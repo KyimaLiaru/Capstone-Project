@@ -69,9 +69,9 @@ def plot_training_history(history):
     plt.show()
 
 # Paths
-musegan_save_path = "../Model/musegan"
-trained_musegan_path = "../Model/musegan.h5"
-preprocessed_lakh_data_path = "../Capstone_Project_Dataset/Lakh/output"
+musegan_save_path = "../../trained_model/musegan"
+trained_musegan_path = ../../trained_model/musegan.h5"
+preprocessed_lakh_data_path = "../../../dataset/Preprocessed/Lakh"
 
 # Split dataset into training and validation sets
 file_list = [os.path.join(preprocessed_lakh_data_path, f) for f in os.listdir(preprocessed_lakh_data_path) if
@@ -155,13 +155,17 @@ def load_nsynth_data(file_list, batch_size):
             yield x_batch, x_batch
 
 
-wavenet_path = "../Model/wavenet.h5"
-temp = False
+# Define paths
+wavenet_save_path = "../../trained_model/wavenet"
+trained_wavenet_path = ../../trained_model/wavenet.h5"
+preprocessed_nsynth_data_path = f"../../../dataset/Preprocessed/NSynth/{input_sample_rate}"
+
+temp = True
 if temp:
     asdf = 0
 else:
-    if os.path.exists(wavenet_path):
-        musegan = tf.keras.models.load_model(wavenet_path)
+    if os.path.exists(trained_wavenet_path):
+        musegan = tf.keras.models.load_model(trained_wavenet_path)
         print("WaveNet model successfully loaded")
     else:
         # Define batch size and sample rate for input data
@@ -169,9 +173,6 @@ else:
         input_sample_rate = 16000
 
         print("WaveNet model not found, building WaveNet model...")
-        # Path to preprocessed NSynth MIDI data
-        preprocessed_nsynth_data_path = f"../Capstone_Project_Dataset/NSynth/output/{input_sample_rate}"
-
         nsynth_train_files = [
             os.path.join(preprocessed_nsynth_data_path, f)
             for f in os.listdir(preprocessed_nsynth_data_path)
@@ -218,7 +219,7 @@ else:
         test_loss = wavenet.evaluate(nsynth_test_data, steps=test_steps)
         print(f"WaveNet test Loss: {test_loss}")
 
-        wavenet.save("../Model/wavenet.h5")
+        wavenet.save(wavenet_save_path)
 
 ###################
 # Generate Output #
