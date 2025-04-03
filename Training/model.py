@@ -70,7 +70,7 @@ def plot_training_history(history):
 
 # Paths
 musegan_save_path = "../../trained_model/musegan"
-trained_musegan_path = ../../trained_model/musegan.h5"
+trained_musegan_path = "../../trained_model/musegan.h5"
 preprocessed_lakh_data_path = "../../../dataset/Preprocessed/Lakh"
 
 # Split dataset into training and validation sets

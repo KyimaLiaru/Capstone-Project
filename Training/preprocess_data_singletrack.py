@@ -23,9 +23,9 @@ def process_lakh_data(file):
         print(f"Error processing file: {e}")
         return None
 
-# Define the base URL for the Lakh MIDI Dataset
-lakh_dataset_path = "../Capstone_Project_Dataset/Raw/Lakh/lmd_matched.tar.gz"
-lakh_preprocess_output_path = "../Capstone_Project_Dataset/Preprocessed/Lakh/output"
+# Define the base path for the Lakh MIDI Dataset
+lakh_dataset_path = "../../../../dataset/Raw/Lakh/lmd_matched.tar.gz"
+lakh_preprocess_output_path = "../../../../dataset/Preprocessed/Lakh/SingleTrack"
 
 # Check whether the output directory exists
 if not os.path.exists(lakh_preprocess_output_path):
@@ -33,7 +33,7 @@ if not os.path.exists(lakh_preprocess_output_path):
 
 # Open the tar.gz file and process each MIDI file
 with tarfile.open(lakh_dataset_path, "r:gz") as tar:
-    i = 1
+    count = 0
     for member in tar.getmembers():
         if member.name.endswith(".mid"):
             # Check whether the preprocessed data exists
@@ -45,12 +45,14 @@ with tarfile.open(lakh_dataset_path, "r:gz") as tar:
             # Extract process the data from the tar.gz file
             file = tar.extractfile(member)
             if file is not None:
-                piano_roll = process_lakh_data(file)
-                if piano_roll is not None:
-                    print(f"Lakh Processed {member.name}, Shape: {piano_roll.shape}")
+                result = process_lakh_data(file)
+                if result is not None:
                     # Save the preprocessed data
-                    np.save(lakh_output_path, piano_roll)
-                    print(f"Lakh Saved: {lakh_output_path}")
+                    np.save(lakh_output_path, result)
+                    print(f"Saved: {lakh_output_path}")
+                    count += 1
+                    if count % 100 == 0:
+                        print(f"Processed {count} files")
 
 ######################################
 # Preprocess and Save NSynth Dataset #

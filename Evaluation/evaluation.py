@@ -74,8 +74,8 @@ def evaluate_musegan(directory_path, time_steps_per_bar=16):
         "Qualified Note Rate (QN)": np.mean(qn_scores)
     }
 
-midi_path = "../Result/midi"
-train_data_path = "../Capstone_Project_Dataset/Lakh/output"
+midi_path = "../../../Result/midi"
+train_data_path = "../../../dataset/Lakh"
 
 # Evaluate the piano rolls
 results = evaluate_musegan(train_data_path)
