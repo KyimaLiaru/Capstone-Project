@@ -83,7 +83,7 @@ def plot_training_history(history):
 # Paths
 musegan_save_path = "../../trained_model/musegan"
 trained_musegan_path = "../../trained_model/musegan.h5"
-preprocessed_lakh_data_path = "../../../dataset/Preprocessed/Lakh"
+preprocessed_lakh_data_path = "../../../dataset/Preprocessed/Lakh/MultiTrack"
 
 # Split dataset into training and validation sets
 file_list = [os.path.join(preprocessed_lakh_data_path, f) for f in os.listdir(preprocessed_lakh_data_path) if
