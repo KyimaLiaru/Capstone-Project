@@ -2,11 +2,11 @@ import os
 import io
 import numpy as np
 import tensorflow as tf
-from tensorflow.keras.layers import Input, Conv1D, LSTM, Dense, Flatten, Reshape, Dropout
+from tensorflow.keras.layers import Input, Conv1D, LSTM, Dense, Flatten, Reshape, Dropout, Concatenate
 from tensorflow.keras.models import Sequential, Model
 import matplotlib.pyplot as plt
 import librosa
-
+    
 ##################################################
 # Load Lakh Midi Dataset and Train MuseGAN Model #
 ##################################################
