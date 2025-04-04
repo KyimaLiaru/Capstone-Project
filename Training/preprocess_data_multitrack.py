@@ -50,39 +50,41 @@ def process_lakh_data(file):
         print(f"Error processing file: {e}")
         return None
 
-# # Define the base path for the Lakh MIDI Dataset
-# lakh_dataset_path = "../../../dataset/Raw/Lakh/lmd_matched.tar.gz"
-# lakh_preprocess_output_path = "../../../dataset/Preprocessed/Lakh/MultiTrack"
-#
-# # Check whether the output directory exists
-# if not os.path.exists(lakh_preprocess_output_path):
-#     os.makedirs(lakh_preprocess_output_path)
-#
-# # Open the tar.gz file and process each MIDI file
-# with tarfile.open(lakh_dataset_path, "r:gz") as tar:
-#     count = 0
-#     for member in tar.getmembers():
-#         if member.name.endswith(".mid"):
-#             # Set the output file name
-#             prefix_parts = member.name.split("/")  # e.g., 'A', 'B', etc.
-#             prefix = "".join(prefix_parts[1:4])  # three directory levels, typically alphabet letters
-#             basename = os.path.basename(member.name).replace(".mid", ".npy")
-#             output_file = os.path.join(lakh_preprocess_output_path, f"{prefix}_{basename}")
-#             if os.path.exists(output_file):
-#                 continue
-#
-#             # Extract process the data from the tar.gz file
-#             file = tar.extractfile(member)
-#             if file is not None:
-#                 result = process_lakh_data(file)
-#                 if result is not None:
-#                     # Save the preprocessed data
-#                     np.save(output_file, result)
-#                     print(f"Saved {output_file}")
-#                     count += 1
-#
-#             if count % 100 == 1:
-#                 print(f"Processed {count} files")
+# Define the base path for the Lakh MIDI Dataset
+lakh_dataset_path = "../../../dataset/Raw/Lakh/"
+lakh_preprocess_output_path = "../../../dataset/Preprocessed/Lakh/MultiTrack"
+
+# Check whether the output directory exists
+if not os.path.exists(lakh_preprocess_output_path):
+    os.makedirs(lakh_preprocess_output_path)
+
+# Open the tar.gz file and process each MIDI file
+with tarfile.open(lakh_dataset_path, "r:gz") as tar:
+    count = 0
+    for member in tar.getmembers():
+        if member.name.endswith(".mid"):
+            # Set the output file name
+            prefix_parts = member.name.split("/")  # e.g., 'A', 'B', etc.
+            prefix = "".join(prefix_parts[1:4])  # three directory levels, typically alphabet letters
+            basename = os.path.basename(member.name).replace(".mid", ".npy")
+            output_file = os.path.join(lakh_preprocess_output_path, f"{prefix}_{basename}")
+            if os.path.exists(output_file):
+                continue
+
+            # Extract process the data from the tar.gz file
+            file = tar.extractfile(member)
+            if file is not None:
+                result = process_lakh_data(file)
+                if result is not None:
+                    # Save the preprocessed data
+                    np.save(output_file, result)
+                    print(f"Saved {output_file}")
+                    count += 1
+
+            if count % 100 == 1:
+                print(f"Processed {count} files")
+
+raise RuntimeError
 
 ######################################
 # Preprocess and Save NSynth Dataset #

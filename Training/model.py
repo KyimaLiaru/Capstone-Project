@@ -11,7 +11,7 @@ import librosa
 # Load Lakh Midi Dataset and Train MuseGAN Model #
 ##################################################
 
-# Function to load all preprocessed Lakh MIDI data
+# Function to load all preprocessed Lakh MIDI data in batch
 def load_lakh_data(file_list, batch_size):
     """
     Generator to load Lakh MIDI data in batches.
@@ -21,23 +21,35 @@ def load_lakh_data(file_list, batch_size):
     while True:  # Infinite loop for generator
         for i in range(0, num_files, batch_size):
             batch_files = file_list[i:i + batch_size]
-            x_batch = np.array([np.load(file, allow_pickle=True) for file in batch_files])
-            yield x_batch, x_batch
+            batch_data = np.array([np.load(file, allow_pickle=True).item() for file in batch_files])
+
+            drum = np.array([d["drum"] for d in batch_data])
+            bass = np.array([d["bass"] for d in batch_data])
+            keyboard = np.array([d["piano"] for d in batch_data])
+            synth_lead = np.array([d["melody"] for d in batch_data])
+            input_tracks = [drum, bass, keyboard, synth_lead]
+
+            yield input_tracks, np.concatenate([track for track in input_tracks], axis=-1)
 
 # Building Simplified MuseGAN Model
-def build_musegan():
+def build_musegan(input_shape=(96, 128), num_tracks=4):
     """
     Build a simple MuseGAN model for symbolic music generation.
     """
-    input_layer = Input(shape=(96, 128))  # Input: piano roll
-    x = LSTM(128, return_sequences=True)(input_layer)
-    x = Dropout(0.3)(x)
-    x = LSTM(128, return_sequences=False)(x)
-    x = Dropout(0.3)(x)
-    x = Dense(128 * 96,  activation='sigmoid')(x)
-    output_layer = Reshape((96, 128))(x)
+    inputs = [Input(shape=input_shape) for _ in range(num_tracks)]
+    processed = []
 
-    model = Model(inputs=input_layer, outputs=output_layer)
+    for inp in inputs:
+        x = LSTM(128, return_sequences=True)(inp)
+        x = Dropout(0.3)(x)
+        x = LSTM(128, return_sequences=False)(x)
+        x = Dropout(0.3)(x)
+        x = Dense(128 * 96,  activation='sigmoid')(x)
+        x = Reshape((96, 128))(x)
+        processed.append(x)
+
+    output = Concatenate(axis=-1)(processed)
+    model = Model(inputs=inputs, outputs=output)
     model.compile(optimizer="adam", loss="binary_crossentropy", metrics=["accuracy"])
     return model
 
@@ -76,12 +88,13 @@ preprocessed_lakh_data_path = "../../../dataset/Preprocessed/Lakh"
 # Split dataset into training and validation sets
 file_list = [os.path.join(preprocessed_lakh_data_path, f) for f in os.listdir(preprocessed_lakh_data_path) if
              f.endswith(".npy")]
+np.random.shuffle(file_list)
 split_index = int(len(file_list) * 0.8)
-lakh_train_files = file_list[:split_index]
-lakh_valid_files = file_list[split_index:]
+lakh_train_files, lakh_valid_files = file_list[:split_index], file_list[split_index:]
 
 # Load preprocessed Lakh MIDI data and define model parameters
 lakh_batch_size = 32
+lakh_epochs = 20
 
 lakh_train_data = load_lakh_data(lakh_train_files, lakh_batch_size)
 lakh_valid_data = load_lakh_data(lakh_valid_files, lakh_batch_size)
@@ -94,10 +107,6 @@ if os.path.exists(trained_musegan_path):
     musegan = tf.keras.models.load_model(trained_musegan_path)
     print("MuseGAN model successfully loaded.")
 
-    # print("MuseGAN validation start...")
-    # musegan_valid_loss = musegan.evaluate(lakh_valid_data, steps=lakh_validation_steps)
-    # print(f"MuseGAN validation loss: {musegan_valid_loss}")
-    # MuseGAN Validation Loss: 0.059657011181116104
 else:
     print("MuseGAN model not found, building MuseGAN model...")
     # Build MuseGAN Model
@@ -110,7 +119,7 @@ else:
     lakh_history = musegan.fit(
         lakh_train_data,
         steps_per_epoch=lakh_steps_per_epoch,
-        epochs=10,
+        epochs=lakh_epochs,
         batch_size=lakh_batch_size,
         validation_data=lakh_valid_data,
         validation_steps=lakh_validation_steps
@@ -119,6 +128,11 @@ else:
     plot_training_history(lakh_history)
 
     musegan.save(musegan_save_path)
+
+# print("MuseGAN validation start...")
+# musegan_valid_loss = musegan.evaluate(lakh_valid_data, steps=lakh_validation_steps)
+# print(f"MuseGAN validation loss: {musegan_valid_loss}")
+# MuseGAN Validation Loss: 0.059657011181116104
 
 ###############################################
 # Load NSynth Dataset and Train WaveNet Model #
@@ -133,7 +147,7 @@ def build_wavenet():
     for rate in [2, 4, 8, 16]:
         x = Conv1D(32, kernel_size=2, dilation_rate=rate, activation="relu", padding="causal")(x)
     x = Flatten()(x)
-    output_layer = Dense(16000, activation="linear", dtype="float32")(x)
+    output_layer = Dense(16000, activation="tanh")(x)
 
     model = Model(inputs=input_layer, outputs=output_layer)
     model.compile(optimizer="adam", loss="mean_squared_error")
@@ -144,20 +158,21 @@ def load_nsynth_data(file_list, batch_size):
     """
     Generator to load preprocessed NSynth .npy files in batches.
     """
-    # List of files for the given list of files
     num_files = len(file_list)
 
-    while True:  # Infinite loop for generator
+    while True:
         for i in range(0, num_files, batch_size):
             batch_files = file_list[i:i + batch_size]
             batch_data = [np.load(file, allow_pickle=True).item() for file in batch_files]
-            x_batch = np.array([sample['audio'] for sample in batch_data])
+            x_batch = np.array([data['audio'] for data in batch_data])
+            x_batch = x_batch[..., np.newaxis]
             yield x_batch, x_batch
 
+input_sample_rate = 16000
 
 # Define paths
 wavenet_save_path = "../../trained_model/wavenet"
-trained_wavenet_path = ../../trained_model/wavenet.h5"
+trained_wavenet_path = "../../trained_model/wavenet.h5"
 preprocessed_nsynth_data_path = f"../../../dataset/Preprocessed/NSynth/{input_sample_rate}"
 
 temp = True
@@ -278,13 +293,13 @@ def visualize_piano_roll(piano_roll, count, save_path=None):
 #         continue
 #     break
 
-# Generate piano roll
-midi_path = "../Result/midi"
-image_path = "../Result/image"
-for i in range(0, 30):
-    print("Generating symbolic music using Simple MuseGAN...")
-    generated_piano_roll = generate_piano_roll(musegan)
-    midi_filename = os.path.join(midi_path, f"{i:03d}.npy")
-    np.save(midi_filename, generated_piano_roll)
-    visualize_piano_roll(generated_piano_roll, i, image_path)
+# # Generate piano roll
+# midi_path = "../Result/midi"
+# image_path = "../Result/image"
+# for i in range(0, 30):
+#     print("Generating symbolic music using Simple MuseGAN...")
+#     generated_piano_roll = generate_piano_roll(musegan)
+#     midi_filename = os.path.join(midi_path, f"{i:03d}.npy")
+#     np.save(midi_filename, generated_piano_roll)
+#     visualize_piano_roll(generated_piano_roll, i, image_path)
 
