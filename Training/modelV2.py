@@ -152,24 +152,24 @@ steps_per_epoch = len(train_files) // batch_size
 validation_steps = len(valid_files) // batch_size
 
 # Preprocess data and form batches
-train_batch = load_lakh_data(train_files, batch_size)
-valid_batch = load_lakh_data(valid_files, batch_size)
+# train_batch = load_lakh_data(train_files, batch_size)
+# valid_batch = load_lakh_data(valid_files, batch_size)
 
-# train_batch = tf.data.Dataset.from_generator(
-#     lambda: load_lakh_data(train_files, batch_size),
-#     output_signature=(
-#         tuple(tf.TensorSpec(shape=(None, 512, 128), dtype=tf.float32) for _ in range(4)),  # ← wrapped in tuple
-#         tf.TensorSpec(shape=(None, 512, 512), dtype=tf.float32)
-#     )
-# )
-#
-# valid_batch = tf.data.Dataset.from_generator(
-#     lambda: load_lakh_data(valid_files, batch_size),
-#     output_signature=(
-#         tuple(tf.TensorSpec(shape=(None, 512, 128), dtype=tf.float32) for _ in range(4)),
-#         tf.TensorSpec(shape=(None, 512, 512), dtype=tf.float32)
-#     )
-# )
+train_batch = tf.data.Dataset.from_generator(
+    lambda: load_lakh_data(train_files, batch_size),
+    output_signature=(
+        tuple(tf.TensorSpec(shape=(None, 512, 128), dtype=tf.float32) for _ in range(4)),  # ← wrapped in tuple
+        tf.TensorSpec(shape=(None, 512, 512), dtype=tf.float32)
+    )
+).prefetch(tf.data.AUTOTUNE)
+
+valid_batch = tf.data.Dataset.from_generator(
+    lambda: load_lakh_data(valid_files, batch_size),
+    output_signature=(
+        tuple(tf.TensorSpec(shape=(None, 512, 128), dtype=tf.float32) for _ in range(4)),
+        tf.TensorSpec(shape=(None, 512, 512), dtype=tf.float32)
+    )
+).prefetch(tf.data.AUTOTUNE)
 
 # Check if trained model already exists
 # if os.path.exists(trained_musegan_path):
