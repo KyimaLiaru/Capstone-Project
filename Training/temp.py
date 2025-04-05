@@ -2,10 +2,10 @@ import tarfile
 import os
 
 # Path to your Lakh MIDI tar.gz file
-tar_path = "../../../../dataset/Raw/Lakh/lmd_matched.tar.gz"
+tar_path = "../../../dataset/Raw/Lakh/lmd_matched.tar.gz"
 
 # Output directory where .mid files will be extracted
-output_dir = "../../../../dataset/Extracted/Lakh"
+output_dir = "../../../dataset/Extracted/Lakh"
 
 # Create the output directory if it doesn't exist
 os.makedirs(output_dir, exist_ok=True)

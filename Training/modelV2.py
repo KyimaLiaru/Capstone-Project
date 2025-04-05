@@ -136,7 +136,7 @@ def plot_training_history(history, path):
 # Paths
 musegan_save_path = "../../trained_model/musegan"
 trained_musegan_path = "../../trained_model/musegan.h5"
-lakh_dataset_path = "../../../../dataset/Extracted/Lakh"
+lakh_dataset_path = "../../../dataset/Extracted/Lakh"
 result_plot_path = "../../../Result/Performance/performance.png"
 
 # Load Extracted Lakh MIDI data
