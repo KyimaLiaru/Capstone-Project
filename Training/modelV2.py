@@ -20,9 +20,9 @@ def build_musegan(input_shape=(512, 128), num_tracks=4):
 
     # Process each track independently
     for inp in inputs:
-        x = LSTM(256, return_sequences=True)(inp)
+        x = LSTM(128, return_sequences=True)(inp)
         x = Dropout(0.3)(x)
-        x = LSTM(256, return_sequences=False)(x)
+        x = LSTM(128, return_sequences=False)(x)
         x = Dropout(0.3)(x)
         x = Dense(np.prod(input_shape),  activation='sigmoid')(x)
         x = Reshape(input_shape)(x)
