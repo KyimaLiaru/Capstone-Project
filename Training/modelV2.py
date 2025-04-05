@@ -57,7 +57,7 @@ def load_lakh_data(file_list, batch_size):
         for i in range(0, num_files, batch_size):
             batch_files = file_list[i:i + batch_size]
             tracks_batch = []
-            print(f"\nLoading batch {batch_count + 1}...")
+            # print(f"\nLoading batch {batch_count + 1}...")
 
             for file in batch_files:
                 if file is not None:
