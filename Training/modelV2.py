@@ -86,18 +86,18 @@ def load_lakh_data(file_list, batch_size):
 
                         # Skip current file if all instruments are empty
                         if drum.sum() == 0 and bass.sum() == 0 and pad.sum() == 0 and melody_roll.sum() == 0:
-                            print(f"Skipped empty file: {file}")
+                            # print(f"Skipped empty file: {file}")
                             continue
 
-                        print(f"Loaded file: {os.path.basename(file)}")
+                        # print(f"Loaded file: {os.path.basename(file)}")
                         # Append the piano roll of four tracks to the batch
                         tracks_batch.append([drum, bass, pad, melody_roll])
                     except Exception as e:
-                        print(f"Failed to process {file}: {e}")
+                        # print(f"Failed to process {file}: {e}")
                         continue
 
             if len(tracks_batch) == 0:
-                print(f"Batch {batch_count + 1} is empty, skipping...")
+                # print(f"Batch {batch_count + 1} is empty, skipping...")
                 continue
             batch_count += 1
             # Transpose "list of samples" to "list of tracks"
