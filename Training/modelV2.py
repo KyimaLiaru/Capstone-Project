@@ -37,7 +37,7 @@ def build_musegan(input_shape=(512, 128), num_tracks=4):
 # Extrack piano roll of an instrument
 def extract_instrument_roll(pm, program_range, drum=False):
     # Initialize the piano roll to prevent "None" to be returned.
-    roll = np.zeros((512, 128), dtype=tf.float32)
+    roll = np.zeros((512, 128), dtype=float)
     # Look for correct track and extract piano roll
     for inst in pm.instruments:
         if drum != inst.is_drum:
@@ -50,53 +50,61 @@ def extract_instrument_roll(pm, program_range, drum=False):
 # Function to load all preprocessed Lakh MIDI data in batch
 def load_lakh_data(file_list, batch_size):
     num_files = len(file_list)
+    batch_count = 0
+
     # Infinite loop for generator
     while True:
         for i in range(0, num_files, batch_size):
             batch_files = file_list[i:i + batch_size]
             tracks_batch = []
+            print(f"\nLoading batch {batch_count + 1}...")
 
             for file in batch_files:
-                try:
-                    # Define appropriate program range and extract piano roll
-                    pm = pretty_midi.PrettyMIDI(file)
-                    drum = extract_instrument_roll(pm, [], drum=True)
-                    bass = extract_instrument_roll(pm, range(32, 40))
-                    pad = extract_instrument_roll(pm, range(0, 8))
+                if file is not None:
+                    try:
+                        # Define appropriate program range and extract piano roll
+                        pm = pretty_midi.PrettyMIDI(file)
+                        drum = extract_instrument_roll(pm, [], drum=True)
+                        bass = extract_instrument_roll(pm, range(32, 40))
+                        pad = extract_instrument_roll(pm, range(0, 8))
 
-                    # Initialize the piano roll to prevent "None" to be returned.
-                    melody_roll = np.zeros((512, 128), dtype=tf.float32)
+                        # Initialize the piano roll to prevent "None" to be returned.
+                        melody_roll = np.zeros((512, 128), dtype=float)
 
-                    melodic_programs = [
-                        range(40, 48), range(48, 56), range(56, 64),
-                        range(64, 72), range(72, 80), range(80, 88), range(88, 96)
-                    ]
-                    # Randomize possible melody instruments for higher variety
-                    np.random.shuffle(melodic_programs)
+                        melodic_programs = [
+                            range(40, 48), range(48, 56), range(56, 64),
+                            range(64, 72), range(72, 80), range(80, 88), range(88, 96)
+                        ]
+                        # Randomize possible melody instruments for higher variety
+                        np.random.shuffle(melodic_programs)
 
-                    for prog in melodic_programs:
-                        melody_roll = extract_instrument_roll(pm, prog)
-                        # Select first non-empty piano roll from randomized list
-                        if melody_roll.sum() > 0:
-                            break
+                        for prog in melodic_programs:
+                            melody_roll = extract_instrument_roll(pm, prog)
+                            # Select first non-empty piano roll from randomized list
+                            if melody_roll.sum() > 0:
+                                break
 
-                    # Skip current file if all instruments are empty
-                    if drum.sum() == 0 and bass.sum() == 0 and pad.sum() == 0 and melody_roll.sum() == 0:
+                        # Skip current file if all instruments are empty
+                        if drum.sum() == 0 and bass.sum() == 0 and pad.sum() == 0 and melody_roll.sum() == 0:
+                            print(f"Skipped empty file: {file}")
+                            continue
+
+                        print(f"Loaded file: {os.path.basename(file)}")
+                        # Append the piano roll of four tracks to the batch
+                        tracks_batch.append([drum, bass, pad, melody_roll])
+                    except Exception as e:
+                        print(f"Failed to process {file}: {e}")
                         continue
 
-                    print(f"Loaded file: {os.path.basename(file)}")
-                    # Append the piano roll of four tracks to the batch
-                    tracks_batch.append([drum, bass, pad, melody_roll])
-                except:
-                    continue
-
             if len(tracks_batch) == 0:
+                print(f"Batch {batch_count + 1} is empty, skipping...")
                 continue
+            batch_count += 1
             # Transpose "list of samples" to "list of tracks"
             batch = list(zip(*tracks_batch))
             inputs = [np.array(track) for track in batch]
             output = np.concatenate(inputs, axis=-1)
-            yield inputs, output
+            yield tuple(inputs), output
 
 # Function to plot training history
 def plot_training_history(history, path):
@@ -147,6 +155,21 @@ validation_steps = len(valid_files) // batch_size
 train_batch = load_lakh_data(train_files, batch_size)
 valid_batch = load_lakh_data(valid_files, batch_size)
 
+# train_batch = tf.data.Dataset.from_generator(
+#     lambda: load_lakh_data(train_files, batch_size),
+#     output_signature=(
+#         tuple(tf.TensorSpec(shape=(None, 512, 128), dtype=tf.float32) for _ in range(4)),  # ← wrapped in tuple
+#         tf.TensorSpec(shape=(None, 512, 512), dtype=tf.float32)
+#     )
+# )
+#
+# valid_batch = tf.data.Dataset.from_generator(
+#     lambda: load_lakh_data(valid_files, batch_size),
+#     output_signature=(
+#         tuple(tf.TensorSpec(shape=(None, 512, 128), dtype=tf.float32) for _ in range(4)),
+#         tf.TensorSpec(shape=(None, 512, 512), dtype=tf.float32)
+#     )
+# )
 
 # Check if trained model already exists
 # if os.path.exists(trained_musegan_path):
