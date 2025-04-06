@@ -36,40 +36,42 @@ def build_musegan(input_shape=(512, 128), num_tracks=4):
     return model
 
 # Function to load all preprocessed Lakh MIDI data in batch
-def load_lakh_data(dataset_path, file_list, batch_size):
+def load_lakh_data(dataset_path, batch_size, data_type, split_ratio=0.8):
     # Infinite loop for generator
-    while True:
-        print("Loading .tar.gz file...")
-        with tarfile.open(dataset_path, "r:gz") as tar:
-            batch_count = 0
-            for i in range(0, len(file_list), batch_size):
-                batch_files = file_list[i:i + batch_size]
-                batch_inputs = []
-                batch_count += 1
-                # print(f"\nLoading batch {batch_count}...")
+    print("Loading .tar.gz file...")
+    with tarfile.open(dataset_path, "r:gz") as tar:
+        files = [member for member in tar.getmembers() if member.name.endswith(".npy")]
+        files.sort()
+        split_index = int(len(files) * split_ratio)
 
-                for file in batch_files:
-                    try:
-                        ext_file = tar.extractfile(file)
-                        if ext_file is None:
-                            continue
-                        data = np.load(io.BytesIO(ext_file.read()), allow_pickle=True).item()
-                        batch_inputs.append([data["drum"], data["bass"], data["piano"], data["lead"]])
-                        print(f"Loaded file: {os.path.basename(file)}")
+        file_list = files[:split_index] if data_type == "train" else files[split_index:]
 
-                    except Exception as e:
-                        print(f"Failed to process {file}: {e}")
-                        continue
+        for i in range(0, len(file_list), batch_size):
+            batch_files = file_list[i:i + batch_size]
+            batch_inputs = []
+            # print(f"\nLoading batch {batch_count}...")
 
-                if len(batch_inputs) == 0:
-                    # print(f"Batch {batch_count + 1} is empty, skipping...")
+            for file in batch_files:
+                try:
+                    ext_file = tar.extractfile(file)
+                    buf = io.BytesIO(ext_file.read())
+                    data = np.load(buf, allow_pickle=True).item()
+                    batch_inputs.append([data["drum"], data["bass"], data["piano"], data["lead"]])
+                    print(f"Loaded file: {file}")
+
+                except Exception as e:
+                    print(f"Failed to process {file}: {e}")
                     continue
 
-                # Transpose "list of samples" to "list of tracks"
-                batch = list(zip(*batch_inputs))
-                inputs = [np.array(track) for track in batch]
-                output = np.concatenate(inputs, axis=-1)
-                yield tuple(inputs), output
+            if len(batch_inputs) == 0:
+                # print(f"Batch {batch_count + 1} is empty, skipping...")
+                continue
+
+            # Transpose "list of samples" to "list of tracks"
+            batch = list(zip(*batch_inputs))
+            inputs = [np.array(track) for track in batch]
+            output = np.concatenate(inputs, axis=-1)
+            yield tuple(inputs), output
 
 # Function to plot training history
 def plot_training_history(history, path):
@@ -105,18 +107,16 @@ lakh_dataset_path = "../../../dataset/Preprocessed/Lakh/MultiTrack-ver2.tar.gz"
 result_plot_path = "../../../Result/Performance/performance.png"
 
 # Load Extracted Lakh MIDI data
-print("Splitting train/validation groups from .tar.gz file...")
-with tarfile.open(lakh_dataset_path, "r:gz") as tar:
-    files = [member for member in tar.getmembers() if member.name.endswith(".npy")]
-    split_index = int(len(files) * 0.8)
-    train_files = files[:split_index]
-    valid_files = files[split_index:]
 
 # Define model parameters
 batch_size = 32
 epochs = 20
-steps_per_epoch = len(train_files) // batch_size
-validation_steps = len(valid_files) // batch_size
+
+num_files = 104918
+num_train_files = int(num_files * 0.8)
+num_valid_files = num_files - num_train_files
+steps_per_epoch = num_train_files // batch_size
+validation_steps = num_valid_files // batch_size
 
 # Preprocess data and form batches
 print("Loading Train Batch...")
