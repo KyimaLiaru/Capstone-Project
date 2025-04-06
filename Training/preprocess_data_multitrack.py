@@ -24,7 +24,7 @@ def extract_instrument_roll(pm, program_range, drum=False):
 def process_lakh_data(file):
     try:
         pm = pretty_midi.PrettyMIDI(file)
-        piano = extract_instrument_roll(pm, range(0, 8))
+        pad = extract_instrument_roll(pm, range(0, 8))
         bass = extract_instrument_roll(pm, range(32, 40))
         drum = extract_instrument_roll(pm, [], drum=True)
 
@@ -38,12 +38,12 @@ def process_lakh_data(file):
                 break
             lead = np.zeros((512, 128), dtype=float)
 
-        if piano.sum() == 0 and bass.sum() == 0 and drum.sum() == 0 and lead.sum() == 0:
+        if pad.sum() == 0 and bass.sum() == 0 and drum.sum() == 0 and lead.sum() == 0:
             return None
         return {
             "drum": drum,
             "bass": bass,
-            "pad": piano,
+            "pad": pad,
             "lead": lead
         }
     except Exception as e:
