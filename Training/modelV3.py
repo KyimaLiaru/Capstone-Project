@@ -77,6 +77,25 @@ def load_lakh_data(dataset_path, batch_size, data_type, split_ratio=0.8):
             output = np.concatenate(inputs, axis=-1)
             yield tuple(inputs), output
 
+def load_data_from_directory(data_dir, file_list, batch_size):
+    while True:
+        for i in range(0, len(file_list), batch_size):
+            batch_files = file_list[i:i + batch_size]
+            batch_inputs = []
+
+            for file in batch_files:
+                try:
+                    data = np.load(os.path.join(data_dir, file), allow_pickle=True).item()
+                    batch_inputs.append([data["drum"], data["bass"], data["pad"], data["lead"]])
+                except Exception as e:
+                    print(f"Failed to load {file}: {e}")
+                    continue
+
+            batch = list(zip(*batch_inputs))
+            inputs = [np.array(track) for track in batch]
+            output = np.concatenate(inputs, axis=-1)
+            yield tuple(inputs), output
+
 # Function to plot training history
 def plot_training_history(history, path):
     # Plot accuracy
@@ -107,7 +126,8 @@ def plot_training_history(history, path):
 # Paths
 musegan_save_path = "../../trained_model/musegan"
 trained_musegan_path = "../../trained_model/musegan.h5"
-lakh_dataset_path = "../../../dataset/Preprocessed/Lakh/MultiTrack-ver3.tar.gz"
+# lakh_dataset_path = "../../../../dataset/Preprocessed/Lakh/MultiTrack-ver3.tar.gz"
+lakh_data_path = "../../../../dataset/Preprocessed/Lakh/MultiTrack"
 result_plot_path = "../../../Result/Performance/performance.png"
 
 # Load Extracted Lakh MIDI data
@@ -116,15 +136,19 @@ result_plot_path = "../../../Result/Performance/performance.png"
 batch_size = 32
 epochs = 20
 
-num_files = 104918
-num_train_files = int(num_files * 0.8)
-num_valid_files = num_files - num_train_files
-steps_per_epoch = num_train_files // batch_size
-validation_steps = num_valid_files // batch_size
+file_list = [f for f in os.listdir(lakh_data_path) if f.endswith(".npy")]
+file_list.sort()
+
+split_index = int(len(file_list) * 0.8)
+train_files = file_list[:split_index]
+valid_files = file_list[split_index:]
+
+steps_per_epoch = len(train_files) // batch_size
+validation_steps = len(valid_files) // batch_size
 
 # Preprocess data and form batches
-train_batch = load_lakh_data(lakh_dataset_path, batch_size, data_type="train", split_ratio=0.8)
-valid_batch = load_lakh_data(lakh_dataset_path, batch_size, data_type="valid", split_ratio=0.8)
+train_batch = load_data_from_directory(lakh_data_path, train_files, batch_size)
+valid_batch = load_data_from_directory(lakh_data_path, valid_files, batch_size)
 
 # Check if trained model already exists
 # if os.path.exists(trained_musegan_path):
