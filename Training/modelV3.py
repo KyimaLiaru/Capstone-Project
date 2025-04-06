@@ -47,10 +47,11 @@ def load_lakh_data(dataset_path, batch_size, data_type, split_ratio=0.8):
 
         print(f"Total files in archive: {len(files)}")
         print(f"Using {len(file_list)} files for {data_type}")
-
+        batch_count = 0
         for i in range(0, len(file_list), batch_size):
             batch_files = file_list[i:i + batch_size]
             batch_inputs = []
+            batch_count += 1
             print(f"\nLoading batch {batch_count}...")
 
             for file in batch_files:
