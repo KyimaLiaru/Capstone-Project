@@ -56,7 +56,7 @@ def load_lakh_data(dataset_path, batch_size, data_type, split_ratio=0.8):
                     buf = io.BytesIO(ext_file.read())
                     data = np.load(buf)
 
-                    batch_inputs.append([data["drum"], data["bass"], data["piano"], data["lead"]])
+                    batch_inputs.append([data["drum"], data["bass"], data["pad"], data["lead"]])
                     print(f"Loaded file: {file}")
 
                 except Exception as e:
