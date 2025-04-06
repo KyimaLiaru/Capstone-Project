@@ -51,8 +51,8 @@ def process_lakh_data(file):
         return None
 
 # Define the base path for the Lakh MIDI Dataset
-lakh_dataset_path = "../../../../dataset/Raw/Lakh/lmd_matched.tar.gz"
-lakh_preprocess_output_path = "../../../../dataset/Preprocessed/Lakh/MultiTrackV3"
+lakh_dataset_path = "../../../dataset/Raw/Lakh/lmd_matched.tar.gz"
+lakh_preprocess_output_path = "../../../dataset/Preprocessed/Lakh/MultiTrackV3"
 
 # Check whether the output directory exists
 if not os.path.exists(lakh_preprocess_output_path):
