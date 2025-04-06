@@ -77,8 +77,8 @@ with tarfile.open(lakh_dataset_path, "r:gz") as tar:
                 result = process_lakh_data(file)
                 if result is not None:
                     # Save the preprocessed data
-                    # np.save(output_file, result)
-                    np.savez(output_file, drum=result["drum"], bass=result["bass"], pad=result["pad"], lead=result["lead"])
+                    np.save(output_file, result)
+                    # np.savez(output_file, drum=result["drum"], bass=result["bass"], pad=result["pad"], lead=result["lead"])
                     print(f"Saved {output_file}")
                     count += 1
 
