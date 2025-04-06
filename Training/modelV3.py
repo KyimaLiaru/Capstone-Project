@@ -8,7 +8,8 @@ from tensorflow.keras.models import Sequential, Model
 import pretty_midi
 import matplotlib.pyplot as plt
 import librosa
-    
+
+
 ##################################################
 # Load Lakh Midi Dataset and Train MuseGAN Model #
 ##################################################
@@ -20,11 +21,11 @@ def build_musegan(input_shape=(512, 128), num_tracks=4):
 
     # Process each track independently
     for inp in inputs:
-        x = LSTM(128, return_sequences=True)(inp)
+        x = LSTM(256, return_sequences=True)(inp)
         x = Dropout(0.3)(x)
-        x = LSTM(128, return_sequences=False)(x)
+        x = LSTM(256, return_sequences=False)(x)
         x = Dropout(0.3)(x)
-        x = Dense(np.prod(input_shape),  activation='sigmoid')(x)
+        x = Dense(np.prod(input_shape), activation='sigmoid')(x)
         x = Reshape(input_shape)(x)
         processed.append(x)
 
@@ -34,74 +35,39 @@ def build_musegan(input_shape=(512, 128), num_tracks=4):
     model.compile(optimizer="adam", loss="binary_crossentropy", metrics=["accuracy"])
     return model
 
-# Extrack piano roll of an instrument
-def extract_instrument_roll(pm, program_range, drum=False):
-    # Initialize the piano roll to prevent "None" to be returned.
-    roll = np.zeros((512, 128), dtype=float)
-    # Look for correct track and extract piano roll
-    for inst in pm.instruments:
-        if drum != inst.is_drum:
-            continue
-        if drum or inst.program in program_range:
-            inst_roll = inst.get_piano_roll(fs=16).T[:512, :128] / 127.0  # Normalize velocity to [0, 1]
-            roll = np.maximum(roll, inst_roll)
-    return roll
-
 # Function to load all preprocessed Lakh MIDI data in batch
-def load_lakh_data(file_list, batch_size):
-    num_files = len(file_list)
-    batch_count = 0
+def load_lakh_data(file_path, batch_size, mode="train", split_ratio=0.8):
+    with tarfile.open(file_path, "r:gz") as tar:
+        npy_files = [member for member in tar.getmembers() if member.name.endswith(".npy")]
+        npy_files.sort()
+        split_index = int(len(npy_files) * split_ratio)
+        split_files = npy_files[:split_index] if mode == "train" else npy_files[split_index:]
 
-    # Infinite loop for generator
+        # Infinite loop for generator
     while True:
-        for i in range(0, num_files, batch_size):
-            batch_files = file_list[i:i + batch_size]
-            tracks_batch = []
+        for i in range(0, len(split_files), batch_size):
+            batch_files = split_files[i:i + batch_size]
+            batch_inputs = []
             # print(f"\nLoading batch {batch_count + 1}...")
 
             for file in batch_files:
-                if file is not None:
-                    try:
-                        # Define appropriate program range and extract piano roll
-                        pm = pretty_midi.PrettyMIDI(file)
-                        drum = extract_instrument_roll(pm, [], drum=True)
-                        bass = extract_instrument_roll(pm, range(32, 40))
-                        pad = extract_instrument_roll(pm, range(0, 8))
-
-                        # Initialize the piano roll to prevent "None" to be returned.
-                        lead = np.zeros((512, 128), dtype=float)
-
-                        melodic_programs = [
-                            range(40, 48), range(48, 56), range(56, 64),
-                            range(64, 72), range(72, 80), range(80, 88), range(88, 96)
-                        ]
-                        # Randomize possible melody instruments for higher variety
-                        np.random.shuffle(melodic_programs)
-
-                        for prog in melodic_programs:
-                            lead = extract_instrument_roll(pm, prog)
-                            # Select first non-empty piano roll from randomized list
-                            if lead.sum() > 0:
-                                break
-
-                        # Skip current file if all instruments are empty
-                        if drum.sum() == 0 and bass.sum() == 0 and pad.sum() == 0 and lead.sum() == 0:
-                            # print(f"Skipped empty file: {file}")
-                            continue
-
-                        # print(f"Loaded file: {os.path.basename(file)}")
-                        # Append the piano roll of four tracks to the batch
-                        tracks_batch.append([drum, bass, pad, lead])
-                    except Exception as e:
-                        # print(f"Failed to process {file}: {e}")
+                try:
+                    ext_file = tar.extractfile(file)
+                    if ext_file is None:
                         continue
+                    data = np.load(ext_file, allow_pickle=True).item()
+                    batch_inputs.append([data["drum"], data["bass"], data["piano"], data["lead"]])
 
-            if len(tracks_batch) == 0:
+                except Exception as e:
+                    # print(f"Failed to process {file}: {e}")
+                    continue
+
+            if len(batch_inputs) == 0:
                 # print(f"Batch {batch_count + 1} is empty, skipping...")
                 continue
-            batch_count += 1
+
             # Transpose "list of samples" to "list of tracks"
-            batch = list(zip(*tracks_batch))
+            batch = list(zip(*batch_inputs))
             inputs = [np.array(track) for track in batch]
             output = np.concatenate(inputs, axis=-1)
             yield tuple(inputs), output
@@ -199,6 +165,7 @@ plot_training_history(lakh_history, result_plot_path)
 
 musegan.save(musegan_save_path)
 
+
 # print("MuseGAN validation start...")
 # musegan_valid_loss = musegan.evaluate(lakh_valid_data, steps=lakh_validation_steps)
 # print(f"MuseGAN validation loss: {musegan_valid_loss}")
@@ -221,6 +188,7 @@ def generate_piano_roll(musegan, sequence_length=512, pitch_range=128):
     # Binarize the output (convert to binary piano roll)
     piano_roll = (piano_roll > 0.5).astype(int)
     return piano_roll
+
 
 def visualize_piano_roll(piano_roll, count, save_path=None):
     """
