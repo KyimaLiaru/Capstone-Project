@@ -39,6 +39,7 @@ def build_musegan(input_shape=(512, 128), num_tracks=4):
 def load_lakh_data(dataset_path, file_list, batch_size):
     # Infinite loop for generator
     while True:
+        print("Loading .tar.gz file...")
         with tarfile.open(dataset_path, "r:gz") as tar:
             batch_count = 0
             for i in range(0, len(file_list), batch_size):
@@ -104,6 +105,7 @@ lakh_dataset_path = "../../../dataset/Preprocessed/Lakh/MultiTrack-ver2.tar.gz"
 result_plot_path = "../../../Result/Performance/performance.png"
 
 # Load Extracted Lakh MIDI data
+print("Splitting train/validation groups from .tar.gz file...")
 with tarfile.open(lakh_dataset_path, "r:gz") as tar:
     files = [member for member in tar.getmembers() if member.name.endswith(".npy")]
     split_index = int(len(files) * 0.8)
