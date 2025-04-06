@@ -36,41 +36,36 @@ def build_musegan(input_shape=(512, 128), num_tracks=4):
     return model
 
 # Function to load all preprocessed Lakh MIDI data in batch
-def load_lakh_data(file_path, batch_size, mode="train", split_ratio=0.8):
-    with tarfile.open(file_path, "r:gz") as tar:
-        npy_files = [member for member in tar.getmembers() if member.name.endswith(".npy")]
-        npy_files.sort()
-        split_index = int(len(npy_files) * split_ratio)
-        split_files = npy_files[:split_index] if mode == "train" else npy_files[split_index:]
-
-        # Infinite loop for generator
+def load_lakh_data(dataset_path, file_list, batch_size):
+    # Infinite loop for generator
     while True:
-        for i in range(0, len(split_files), batch_size):
-            batch_files = split_files[i:i + batch_size]
-            batch_inputs = []
-            # print(f"\nLoading batch {batch_count + 1}...")
+        with tarfile.open(dataset_path, "r:gz") as tar:
+            for i in range(0, len(file_list), batch_size):
+                batch_files = file_list[i:i + batch_size]
+                batch_inputs = []
+                # print(f"\nLoading batch {batch_count + 1}...")
 
-            for file in batch_files:
-                try:
-                    ext_file = tar.extractfile(file)
-                    if ext_file is None:
+                for file in batch_files:
+                    try:
+                        ext_file = tar.extractfile(file)
+                        if ext_file is None:
+                            continue
+                        data = np.load(io.BytesIO(ext_file.read()), allow_pickle=True).item()
+                        batch_inputs.append([data["drum"], data["bass"], data["piano"], data["lead"]])
+
+                    except Exception as e:
+                        # print(f"Failed to process {file}: {e}")
                         continue
-                    data = np.load(ext_file, allow_pickle=True).item()
-                    batch_inputs.append([data["drum"], data["bass"], data["piano"], data["lead"]])
 
-                except Exception as e:
-                    # print(f"Failed to process {file}: {e}")
+                if len(batch_inputs) == 0:
+                    # print(f"Batch {batch_count + 1} is empty, skipping...")
                     continue
 
-            if len(batch_inputs) == 0:
-                # print(f"Batch {batch_count + 1} is empty, skipping...")
-                continue
-
-            # Transpose "list of samples" to "list of tracks"
-            batch = list(zip(*batch_inputs))
-            inputs = [np.array(track) for track in batch]
-            output = np.concatenate(inputs, axis=-1)
-            yield tuple(inputs), output
+                # Transpose "list of samples" to "list of tracks"
+                batch = list(zip(*batch_inputs))
+                inputs = [np.array(track) for track in batch]
+                output = np.concatenate(inputs, axis=-1)
+                yield tuple(inputs), output
 
 # Function to plot training history
 def plot_training_history(history, path):
@@ -102,14 +97,16 @@ def plot_training_history(history, path):
 # Paths
 musegan_save_path = "../../trained_model/musegan"
 trained_musegan_path = "../../trained_model/musegan.h5"
-lakh_dataset_path = "../../../dataset/Extracted/Lakh"
+lakh_dataset_path = "../../../dataset/Preprocessed/Lakh/MultiTrack-ver2.tar.gz"
 result_plot_path = "../../../Result/Performance/performance.png"
 
 # Load Extracted Lakh MIDI data
-file_list = [os.path.join(lakh_dataset_path, f) for f in os.listdir(lakh_dataset_path) if f.endswith(".mid")]
-np.random.shuffle(file_list)
-split_index = int(len(file_list) * 0.8)
-train_files, valid_files = file_list[:split_index], file_list[split_index:]
+with tarfile.open(lakh_dataset_path, "r:gz") as tar:
+    files = [member for member in tar.getmembers() if member.name.endswith(".npy")]
+    files.sort()
+    split_index = int(len(files) * 0.8)
+    train_files = files[:split_index]
+    valid_files = files[split_index:]
 
 # Define model parameters
 batch_size = 32
@@ -118,24 +115,8 @@ steps_per_epoch = len(train_files) // batch_size
 validation_steps = len(valid_files) // batch_size
 
 # Preprocess data and form batches
-# train_batch = load_lakh_data(train_files, batch_size)
-# valid_batch = load_lakh_data(valid_files, batch_size)
-
-train_batch = tf.data.Dataset.from_generator(
-    lambda: load_lakh_data(train_files, batch_size),
-    output_signature=(
-        tuple(tf.TensorSpec(shape=(None, 512, 128), dtype=tf.float32) for _ in range(4)),  # ← wrapped in tuple
-        tf.TensorSpec(shape=(None, 512, 512), dtype=tf.float32)
-    )
-).prefetch(tf.data.AUTOTUNE)
-
-valid_batch = tf.data.Dataset.from_generator(
-    lambda: load_lakh_data(valid_files, batch_size),
-    output_signature=(
-        tuple(tf.TensorSpec(shape=(None, 512, 128), dtype=tf.float32) for _ in range(4)),
-        tf.TensorSpec(shape=(None, 512, 512), dtype=tf.float32)
-    )
-).prefetch(tf.data.AUTOTUNE)
+train_batch = load_lakh_data(lakh_dataset_path, train_files, batch_size)
+valid_batch = load_lakh_data(lakh_dataset_path, valid_files, batch_size)
 
 # Check if trained model already exists
 # if os.path.exists(trained_musegan_path):
