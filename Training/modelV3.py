@@ -45,7 +45,7 @@ def load_lakh_data(dataset_path, file_list, batch_size):
                 batch_files = file_list[i:i + batch_size]
                 batch_inputs = []
                 batch_count += 1
-                print(f"\nLoading batch {batch_count}...")
+                # print(f"\nLoading batch {batch_count}...")
 
                 for file in batch_files:
                     try:
@@ -54,9 +54,10 @@ def load_lakh_data(dataset_path, file_list, batch_size):
                             continue
                         data = np.load(io.BytesIO(ext_file.read()), allow_pickle=True).item()
                         batch_inputs.append([data["drum"], data["bass"], data["piano"], data["lead"]])
+                        print(f"Loaded file: {os.path.basename(file)}")
 
                     except Exception as e:
-                        # print(f"Failed to process {file}: {e}")
+                        print(f"Failed to process {file}: {e}")
                         continue
 
                 if len(batch_inputs) == 0:
@@ -116,7 +117,9 @@ steps_per_epoch = len(train_files) // batch_size
 validation_steps = len(valid_files) // batch_size
 
 # Preprocess data and form batches
+print("Loading Train Batch...")
 train_batch = load_lakh_data(lakh_dataset_path, train_files, batch_size)
+print("Loading Validation Batch...")
 valid_batch = load_lakh_data(lakh_dataset_path, valid_files, batch_size)
 
 # Check if trained model already exists
