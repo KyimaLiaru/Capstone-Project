@@ -54,7 +54,8 @@ def load_lakh_data(dataset_path, batch_size, data_type, split_ratio=0.8):
                 try:
                     ext_file = tar.extractfile(file)
                     buf = io.BytesIO(ext_file.read())
-                    data = np.load(buf, allow_pickle=True).item()
+                    data = np.load(buf)
+
                     batch_inputs.append([data["drum"], data["bass"], data["piano"], data["lead"]])
                     print(f"Loaded file: {file}")
 

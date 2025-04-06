@@ -52,7 +52,7 @@ def process_lakh_data(file):
 
 # Define the base path for the Lakh MIDI Dataset
 lakh_dataset_path = "../../../../dataset/Raw/Lakh/lmd_matched.tar.gz"
-lakh_preprocess_output_path = "../../../../dataset/Preprocessed/Lakh/MultiTrack"
+lakh_preprocess_output_path = "../../../../dataset/Preprocessed/Lakh/MultiTrackV3"
 
 # Check whether the output directory exists
 if not os.path.exists(lakh_preprocess_output_path):
@@ -77,7 +77,8 @@ with tarfile.open(lakh_dataset_path, "r:gz") as tar:
                 result = process_lakh_data(file)
                 if result is not None:
                     # Save the preprocessed data
-                    np.save(output_file, result)
+                    # np.save(output_file, result)
+                    np.savez(output_file, drum=result["drum"], bass=result["bass"], pad=result["pad"], lead=result["lead"])
                     print(f"Saved {output_file}")
                     count += 1
 
