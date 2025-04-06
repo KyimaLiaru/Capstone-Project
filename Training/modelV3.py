@@ -40,10 +40,12 @@ def load_lakh_data(dataset_path, file_list, batch_size):
     # Infinite loop for generator
     while True:
         with tarfile.open(dataset_path, "r:gz") as tar:
+            batch_count = 0
             for i in range(0, len(file_list), batch_size):
                 batch_files = file_list[i:i + batch_size]
                 batch_inputs = []
-                # print(f"\nLoading batch {batch_count + 1}...")
+                batch_count += 1
+                print(f"\nLoading batch {batch_count}...")
 
                 for file in batch_files:
                     try:
