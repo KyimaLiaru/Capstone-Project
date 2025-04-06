@@ -105,7 +105,6 @@ result_plot_path = "../../../Result/Performance/performance.png"
 # Load Extracted Lakh MIDI data
 with tarfile.open(lakh_dataset_path, "r:gz") as tar:
     files = [member for member in tar.getmembers() if member.name.endswith(".npy")]
-    files.sort()
     split_index = int(len(files) * 0.8)
     train_files = files[:split_index]
     valid_files = files[split_index:]
