@@ -41,7 +41,6 @@ def load_lakh_data(dataset_path, batch_size, data_type, split_ratio=0.8):
     print("Loading .tar.gz file...")
     with tarfile.open(dataset_path, "r:gz") as tar:
         files = [member for member in tar.getmembers() if member.name.endswith(".npy")]
-        files.sort()
         split_index = int(len(files) * split_ratio)
 
         file_list = files[:split_index] if data_type == "train" else files[split_index:]
