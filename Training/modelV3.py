@@ -119,10 +119,8 @@ steps_per_epoch = num_train_files // batch_size
 validation_steps = num_valid_files // batch_size
 
 # Preprocess data and form batches
-print("Loading Train Batch...")
-train_batch = load_lakh_data(lakh_dataset_path, train_files, batch_size)
-print("Loading Validation Batch...")
-valid_batch = load_lakh_data(lakh_dataset_path, valid_files, batch_size)
+train_batch = load_lakh_data(lakh_dataset_path, batch_size, data_type="train", split_ratio=0.8)
+valid_batch = load_lakh_data(lakh_dataset_path, batch_size, data_type="valid", split_ratio=0.8)
 
 # Check if trained model already exists
 # if os.path.exists(trained_musegan_path):
