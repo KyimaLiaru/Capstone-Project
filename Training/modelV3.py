@@ -127,7 +127,7 @@ def plot_training_history(history, path):
 musegan_save_path = "../../trained_model/musegan"
 trained_musegan_path = "../../trained_model/musegan.h5"
 # lakh_dataset_path = "../../../../dataset/Preprocessed/Lakh/MultiTrack-ver3.tar.gz"
-lakh_data_path = "../../../../dataset/Preprocessed/Lakh/MultiTrack_bakcup"
+lakh_data_path = "../../../dataset/Preprocessed/Lakh/MultiTrack"
 result_plot_path = "../../../Result/Performance/performance.png"
 
 # Load Extracted Lakh MIDI data
