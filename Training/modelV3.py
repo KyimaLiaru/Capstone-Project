@@ -83,7 +83,6 @@ def load_lakh_data(dataset_path, batch_size, data_type, split_ratio=0.8):
 def load_data_from_directory(data_dir, file_list, batch_size):
     while True:
         for i in range(0, len(file_list), batch_size):
-            print(i)
             batch_files = file_list[i:i + batch_size]
             batch_inputs = []
 
