@@ -1,5 +1,6 @@
 import os
 import io
+import re
 import json
 import tarfile
 import numpy as np
@@ -129,10 +130,10 @@ def plot_training_history(csv_path, save_path):
 
 # Paths
 musegan_save_path = "../../trained_model/musegan.h5"
-musegan_checkpoint_path = "../../trained_model/musegan_checkpoints.h5"
+musegan_checkpoint_path = "../../trained_model/musegan_checkpoints"
+musegan_checkpoint_name = os.path.join(musegan_checkpoint_path, "musegan_epoch_{epoch:02d}.h5")
 musegan_log_path = "../../trained_model/musegan_training_log.csv"
 trained_musegan_path = "../../trained_model/musegan.h5"
-
 training_history_path = "../../trained_model/training_history.json"
 history = {"loss": [], "accuracy": [], "val_loss": [], "val_accuracy": []}
 
@@ -163,6 +164,17 @@ validation_steps = len(valid_files) // batch_size
 train_batch = load_data_from_directory(lakh_data_path, train_files, batch_size)
 valid_batch = load_data_from_directory(lakh_data_path, valid_files, batch_size)
 
+checkpoint_files = [f for f in os.listdir(musegan_checkpoint_path) if re.match(r"musegan_epoch_(\d{2})\.h5", f)]
+
+latest_epoch = 0
+latest_checkpoint = None
+
+if checkpoint_files:
+    checkpoint_epochs = [int(re.search(r"musegan_epoch_(\d{2})\.h5", f).group(1)) for f in checkpoint_files]
+    latest_epoch = max(checkpoint_epochs)
+    latest_checkpoint = os.path.join(musegan_checkpoint_path, f"musegan_epoch_{latest_epoch:02d}.h5")
+
+
 # Check if trained model already exists
 if os.path.exists(trained_musegan_path):
 # if False:
@@ -171,7 +183,7 @@ if os.path.exists(trained_musegan_path):
 
 elif os.path.exists(musegan_checkpoint_path):
     musegan = tf.keras.models.load_model(musegan_checkpoint_path)
-    print("MuseGAN model successfully loaded from checkpoint.")
+    print(f"MuseGAN model successfully loaded from checkpoint at epoch {latest_epoch}.")
 else:
     musegan = build_musegan()
     print("MuseGAN model not found, building new MuseGAN model...")
@@ -181,7 +193,7 @@ print("MuseGAN model summary:")
 musegan.summary()
 
 callbacks = [
-    ModelCheckpoint(musegan_checkpoint_path, monitor='val_loss', save_best_only=False, save_weights_only=False, verbose=1),
+    ModelCheckpoint(filepath=musegan_checkpoint_name, save_best_only=False, save_weights_only=False, verbose=1),
     CSVLogger(musegan_log_path, append=True)
 ]
 
@@ -194,7 +206,8 @@ lakh_history = musegan.fit(
     batch_size=batch_size,
     validation_data=valid_batch,
     validation_steps=validation_steps,
-    callbacks=callbacks
+    callbacks=callbacks,
+    initial_epoch=latest_epoch
 )
 
 plot_training_history(musegan_log_path, result_plot_path)
