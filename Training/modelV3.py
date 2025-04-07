@@ -181,8 +181,8 @@ if os.path.exists(trained_musegan_path):
     musegan = tf.keras.models.load_model(trained_musegan_path)
     print("MuseGAN model successfully loaded.")
 
-elif os.path.exists(musegan_checkpoint_path):
-    musegan = tf.keras.models.load_model(musegan_checkpoint_path)
+elif latest_checkpoint and os.path.exists(latest_checkpoint):
+    musegan = tf.keras.models.load_model(latest_checkpoint)
     print(f"MuseGAN model successfully loaded from checkpoint at epoch {latest_epoch}.")
 else:
     musegan = build_musegan()
