@@ -251,7 +251,7 @@ def generate_piano_roll(musegan, sequence_length=96, pitch_range=128):
     piano_roll = musegan.predict(random_input)
 
     # Binarize the output (convert to binary piano roll)
-    piano_roll = (piano_roll > 0.5).astype(int)
+    piano_roll = (piano_roll > 0.5).astype(np.float32)
     return piano_roll
 
 def visualize_piano_roll(piano_roll, count, save_path=None):
