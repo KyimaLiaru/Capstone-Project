@@ -45,7 +45,7 @@ def visualize_piano_roll(drum, bass, pad, lead, save_path):
     combined_path = os.path.join(save_path, "combined.png")
     grid_path = os.path.join(save_path, "grid.png")
 
-    combined_roll = np.vstack([drum.T, bass.T, pad.T, lead.T])
+    combined_roll = np.vstack([drum[:100].T, bass[:100].T, pad[:100].T, lead[:100].T])
     plt.figure(figsize=(10, 10))
     plt.imshow(combined_roll, aspect="auto", origin="lower", cmap="hot")
     plt.title("Combined Piano Roll")
@@ -57,12 +57,12 @@ def visualize_piano_roll(drum, bass, pad, lead, save_path):
     print(f"Saved combined roll to {combined_path}.")
 
     fig, axes = plt.subplots(2, 2, figsize=(14, 8))
-    rolls = [drum, bass, pad, lead]
+    rolls = [drum[:100], bass[:100], pad[:100], lead[:100]]
     titles = ["Drum", "Bass", "Pad", "Lead"]
 
     for ax, roll, title in zip(axes.flat, rolls, titles):
         ax.imshow(roll.T, aspect='auto', origin='lower', cmap='gray_r')
-        ax.set_title(f"{titles} Piano Roll")
+        ax.set_title(f"{title} Piano Roll")
         ax.set_xlabel("Time Step")
         ax.set_ylabel("MIDI Pitch")
 
