@@ -125,7 +125,9 @@ def plot_training_history(csv_path, save_path):
 
     plt.tight_layout()
     plt.savefig(save_path, dpi=300)
+    print(f"Saved training history to {save_path}")
     plt.show()
+    plt.close()
 
 
 # Paths
@@ -213,7 +215,7 @@ if not trained_model:
         callbacks=callbacks,
         initial_epoch=latest_epoch
     )
-        
+
     musegan.save(musegan_save_path)
 
 plot_training_history(musegan_log_path, result_plot_path)
