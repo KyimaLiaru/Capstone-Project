@@ -25,6 +25,9 @@ def generate_piano_roll(musegan, sequence_length=512, pitch_range=128):
 
     # Binarize the output (convert to binary piano roll)
     output = output[0]
+    
+    output = (output > 0.5).astype(int)
+
     drum_output, bass_output, pad_output, lead_output = np.split(output, 4, axis=-1)
 
     # piano_roll = (piano_roll > 0.5).astype(int)
