@@ -1,4 +1,6 @@
 import numpy as np
+import tensorflow as tf
+from tensorflow.keras.models import Sequential, Model
 import matplotlib.pyplot as plt
 
 ###################
@@ -79,3 +81,10 @@ def visualize_piano_roll(drum, bass, pad, lead, save_path=None):
 #     np.save(midi_filename, generated_piano_roll)
 #     visualize_piano_roll(generated_piano_roll, i, image_path)
 
+# Load MuseGAN model
+musegan_save_path = "../../trained_model/musegan_checkpoints/musegan_epoch_15.h5"
+
+musegan = tf.keras.models.load_model(musegan_save_path)
+
+drum, bass, pad, lead = generate_piano_roll(musegan)
+visualize_piano_roll(drum, bass, pad, lead)
