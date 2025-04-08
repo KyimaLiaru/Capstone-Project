@@ -63,8 +63,8 @@ def visualize_piano_roll(drum, bass, pad, lead, save_path):
     for ax, roll, title in zip(axes.flat, rolls, titles):
         ax.imshow(roll.T, aspect='auto', origin='lower', cmap='gray_r')
         ax.set_title(f"{titles} Piano Roll")
-        ax.xlabel("Time Step")
-        ax.ylabel("MIDI Pitch")
+        ax.set_xlabel("Time Step")
+        ax.set_ylabel("MIDI Pitch")
 
     plt.tight_layout()
     plt.savefig(grid_path, dpi=300)
