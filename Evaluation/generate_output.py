@@ -97,6 +97,7 @@ musegan_save_path = "../../trained_model/musegan_checkpoints/musegan_epoch_15.h5
 figure_path = "../Result/Rolls"
 
 musegan = tf.keras.models.load_model(musegan_save_path)
+print("Model successfully loaded.")
 
 drum, bass, pad, lead = generate_piano_roll(musegan)
 visualize_piano_roll(drum, bass, pad, lead, figure_path)

@@ -175,11 +175,14 @@ if checkpoint_files:
     latest_checkpoint = os.path.join(musegan_checkpoint_path, f"musegan_epoch_{latest_epoch:02d}.h5")
 
 
+trained_model = False
+
 # Check if trained model already exists
 if os.path.exists(trained_musegan_path):
 # if False:
     musegan = tf.keras.models.load_model(trained_musegan_path)
     print("MuseGAN model successfully loaded.")
+    trained_model = True
 
 elif latest_checkpoint and os.path.exists(latest_checkpoint):
     musegan = tf.keras.models.load_model(latest_checkpoint)
@@ -188,31 +191,34 @@ else:
     musegan = build_musegan()
     print("MuseGAN model not found, building new MuseGAN model...")
 
-# Build MuseGAN Model
-print("MuseGAN model summary:")
-musegan.summary()
+if not trained_model:
+    # Build MuseGAN Model
+    print("MuseGAN model summary:")
+    musegan.summary()
 
-callbacks = [
-    ModelCheckpoint(filepath=musegan_checkpoint_name, save_best_only=False, save_weights_only=False, verbose=1),
-    CSVLogger(musegan_log_path, append=True)
-]
+    callbacks = [
+        ModelCheckpoint(filepath=musegan_checkpoint_name, save_best_only=False, save_weights_only=False, verbose=1),
+        CSVLogger(musegan_log_path, append=True)
+    ]
 
-# Train MuseGAN Model
-print("MuseGAN train start...")
-lakh_history = musegan.fit(
-    train_batch,
-    steps_per_epoch=steps_per_epoch,
-    epochs=epochs,
-    batch_size=batch_size,
-    validation_data=valid_batch,
-    validation_steps=validation_steps,
-    callbacks=callbacks,
-    initial_epoch=latest_epoch
-)
+    # Train MuseGAN Model
+    print("MuseGAN train start...")
+    lakh_history = musegan.fit(
+        train_batch,
+        steps_per_epoch=steps_per_epoch,
+        epochs=epochs,
+        batch_size=batch_size,
+        validation_data=valid_batch,
+        validation_steps=validation_steps,
+        callbacks=callbacks,
+        initial_epoch=latest_epoch
+    )
+        
+    musegan.save(musegan_save_path)
 
 plot_training_history(musegan_log_path, result_plot_path)
 
-musegan.save(musegan_save_path)
+
 
 
 # print("MuseGAN validation start...")
