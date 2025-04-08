@@ -113,6 +113,7 @@ def plot_training_history(csv_path, save_path):
     plt.ylabel('Accuracy')
     plt.title('Model Accuracy')
     plt.legend()
+    plt.xticks(range(0, 21, 4))
 
     # Plot loss
     plt.subplot(1, 2, 2)
@@ -122,6 +123,7 @@ def plot_training_history(csv_path, save_path):
     plt.ylabel('Loss')
     plt.title('Model Loss')
     plt.legend()
+    plt.xticks(range(0, 21, 4))
 
     plt.tight_layout()
     plt.savefig(save_path, dpi=300)
