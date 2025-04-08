@@ -17,7 +17,8 @@ def extract_instrument_roll(pm, program_range, drum=False):
         if drum != inst.is_drum:
             continue
         if drum or inst.program in program_range:
-            inst_roll = inst.get_piano_roll(fs=16).T[:512, :128] / 127.0  # Normalize velocity to [0, 1]
+            inst_roll = inst.get_piano_roll(fs=16).T[:512, :128]
+            inst_roll = (inst_roll > 0).astype(float)
             roll = np.maximum(roll, inst_roll)
     return roll
 
