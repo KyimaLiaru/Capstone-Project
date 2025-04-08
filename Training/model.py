@@ -6,7 +6,7 @@ from tensorflow.keras.layers import Input, Conv1D, LSTM, Dense, Flatten, Reshape
 from tensorflow.keras.models import Sequential, Model
 import matplotlib.pyplot as plt
 import librosa
-    
+
 ##################################################
 # Load Lakh Midi Dataset and Train MuseGAN Model #
 ##################################################
