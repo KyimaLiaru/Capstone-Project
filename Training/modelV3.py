@@ -157,9 +157,6 @@ if __name__ == "__main__":
                 history = json.load(f)
             print("loaded previous training history.")
 
-        time.sleep(1)
-        raise tf.errors.ResourceExhaustedError(None, None, "Simulated OOM")
-
         file_list = [f for f in os.listdir(lakh_data_path) if f.endswith(".npy")]
         file_list.sort()
 
