@@ -78,7 +78,7 @@ with tarfile.open(lakh_dataset_path, "r:gz") as tar:
             # Extract process the data from the tar.gz file
             file = tar.extractfile(member)
             if file is not None:
-                result = process_lakh_data(member.name)
+                result = process_lakh_data(file)
                 # if np.sum(result["drum"]) == 0:
                 #     print("No drum data in", file)
 
