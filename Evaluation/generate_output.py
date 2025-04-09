@@ -93,13 +93,20 @@ def piano_roll_to_instrument(roll, program=0, is_drum=False):
                 note_on = t
             elif roll[t, pitch] == 0 and active:
                 note_off = t
-                start = note_on * time_step
-                end = note_off * time_step
-                inst.notes.append(pretty_midi.Note(velocity=100, pitch=pitch, start=start, end=end))
+                inst.notes.append(pretty_midi.Note(
+                    velocity=int(100),
+                    pitch=int(pitch),
+                    start=float(note_on * time_step),
+                    end=float(note_off * time_step)
+                ))
                 active = False
         if active:
-            end = roll.shape[0] * time_step
-            inst.notes.append(pretty_midi.Note(velocity=100, pitch=pitch, start=note_on * time_step, end=end))
+            inst.notes.append(pretty_midi.Note(
+                velocity=int(100),
+                pitch=int(pitch),
+                start=float(note_on * time_step),
+                end=float(roll.shape[0] * time_step)
+            ))
     return inst
 
 def save_tracks_to_midi(drum, bass, pad, lead, output_path):
