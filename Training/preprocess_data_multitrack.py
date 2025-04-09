@@ -29,6 +29,7 @@ def process_lakh_data(file):
         bass = extract_instrument_roll(pm, range(32, 40))
         drum = extract_instrument_roll(pm, [], drum=True)
 
+
         # Randomly select a melodic instrument
         melodic_programs = [range(40, 48), range(48, 56), range(56, 64), range(64, 72), range(72, 80), range(80, 88), range(88, 96)]
         np.random.shuffle(melodic_programs)
@@ -69,13 +70,16 @@ with tarfile.open(lakh_dataset_path, "r:gz") as tar:
             prefix = "".join(prefix_parts[1:4])  # three directory levels, typically alphabet letters
             basename = os.path.basename(member.name).replace(".mid", ".npy")
             output_file = os.path.join(lakh_preprocess_output_path, f"{prefix}_{basename}")
-            if os.path.exists(output_file):
-                continue
+            # if os.path.exists(output_file):
+            #     continue
 
             # Extract process the data from the tar.gz file
             file = tar.extractfile(member)
             if file is not None:
-                result = process_lakh_data(file)
+                result = process_lakh_data(member.name)
+                if np.sum(result["drum"]) == 0:
+                    print("No drum data in", file)
+
                 if result is not None:
                     # Save the preprocessed data
                     np.save(output_file, result)
