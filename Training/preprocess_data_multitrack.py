@@ -18,10 +18,11 @@ def extract_instrument_roll(pm, program_range, drum=False):
             continue
         if drum:
             inst_roll = extract_drum_roll(inst)
+            roll = np.maximum(roll, inst_roll)
         elif inst.program in program_range:
             inst_roll = inst.get_piano_roll(fs=16).T[:512, :128]
             inst_roll = (inst_roll > 0).astype(float)
-        roll = np.maximum(roll, inst_roll)
+            roll = np.maximum(roll, inst_roll)
     return roll
 
 def extract_drum_roll(inst, fs=16, length=512):
