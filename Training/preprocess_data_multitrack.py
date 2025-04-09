@@ -14,9 +14,9 @@ import json
 def extract_instrument_roll(pm, program_range, drum=False):
     roll = np.zeros((512, 128), dtype=float)
     for inst in pm.instruments:
-        if (drum and inst.is_drum) or (inst.program in program_range):
-        #     continue
-        # if drum or inst.program in program_range:
+        if drum != inst.is_drum:
+            continue
+        if drum or inst.program in program_range:
             inst_roll = inst.get_piano_roll(fs=16).T[:512, :128]
             inst_roll = (inst_roll > 0).astype(float)
             roll = np.maximum(roll, inst_roll)
