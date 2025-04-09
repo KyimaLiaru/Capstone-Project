@@ -2,6 +2,7 @@ import os
 import io
 import re
 import json
+import sys
 import tarfile
 import numpy as np
 import tensorflow as tf
@@ -132,93 +133,99 @@ def plot_training_history(csv_path, save_path):
     plt.close()
 
 
-# Paths
-musegan_save_path = "../../trained_model/musegan.h5"
-musegan_checkpoint_path = "../../trained_model/musegan_checkpoints"
-musegan_checkpoint_name = os.path.join(musegan_checkpoint_path, "musegan_epoch_{epoch:02d}.h5")
-musegan_log_path = "../../trained_model/musegan_training_log.csv"
-trained_musegan_path = "../../trained_model/musegan.h5"
-training_history_path = "../../trained_model/training_history.json"
-history = {"loss": [], "accuracy": [], "val_loss": [], "val_accuracy": []}
+if __name__ == "__main__":
 
-if os.path.exists(training_history_path):
-    with open(training_history_path, "r") as f:
-        history = json.load(f)
-    print("loaded previous training history.")
+    # Paths
+    musegan_save_path = "../../trained_model/musegan.h5"
+    musegan_checkpoint_path = "../../trained_model/musegan_checkpoints"
+    musegan_checkpoint_name = os.path.join(musegan_checkpoint_path, "musegan_epoch_{epoch:02d}.h5")
+    musegan_log_path = "../../trained_model/musegan_training_log.csv"
+    trained_musegan_path = "../../trained_model/musegan.h5"
+    training_history_path = "../../trained_model/training_history.json"
+    history = {"loss": [], "accuracy": [], "val_loss": [], "val_accuracy": []}
 
-# lakh_dataset_path = "../../../dataset/Preprocessed/Lakh/MultiTrack-ver3.tar.gz"
-lakh_data_path = "../../../dataset/Preprocessed/Lakh/MultiTrack"
-result_plot_path = "../../../Result/Performance/performance.png"
+    if os.path.exists(training_history_path):
+        with open(training_history_path, "r") as f:
+            history = json.load(f)
+        print("loaded previous training history.")
 
-# Define model parameters
-batch_size = 32
-epochs = 20
+    # lakh_dataset_path = "../../../dataset/Preprocessed/Lakh/MultiTrack-ver3.tar.gz"
+    lakh_data_path = "../../../dataset/Preprocessed/Lakh/MultiTrack"
+    result_plot_path = "../../../Result/Performance/performance.png"
 
-file_list = [f for f in os.listdir(lakh_data_path) if f.endswith(".npy")]
-file_list.sort()
+    # Define model parameters
+    batch_size = 32
+    epochs = 20
 
-split_index = int(len(file_list) * 0.8)
-train_files = file_list[:split_index]
-valid_files = file_list[split_index:]
+    file_list = [f for f in os.listdir(lakh_data_path) if f.endswith(".npy")]
+    file_list.sort()
 
-steps_per_epoch = len(train_files) // batch_size
-validation_steps = len(valid_files) // batch_size
+    split_index = int(len(file_list) * 0.8)
+    train_files = file_list[:split_index]
+    valid_files = file_list[split_index:]
 
-# Preprocess data and form batches
-train_batch = load_data_from_directory(lakh_data_path, train_files, batch_size)
-valid_batch = load_data_from_directory(lakh_data_path, valid_files, batch_size)
+    steps_per_epoch = len(train_files) // batch_size
+    validation_steps = len(valid_files) // batch_size
 
-checkpoint_files = [f for f in os.listdir(musegan_checkpoint_path) if re.match(r"musegan_epoch_(\d{2})\.h5", f)]
+    # Preprocess data and form batches
+    train_batch = load_data_from_directory(lakh_data_path, train_files, batch_size)
+    valid_batch = load_data_from_directory(lakh_data_path, valid_files, batch_size)
 
-latest_epoch = 0
-latest_checkpoint = None
+    latest_epoch = 0
+    latest_checkpoint = None
 
-if checkpoint_files:
-    checkpoint_epochs = [int(re.search(r"musegan_epoch_(\d{2})\.h5", f).group(1)) for f in checkpoint_files]
-    latest_epoch = max(checkpoint_epochs)
-    latest_checkpoint = os.path.join(musegan_checkpoint_path, f"musegan_epoch_{latest_epoch:02d}.h5")
+    if os.path.exists(musegan_checkpoint_path):
+        checkpoint_files = [f for f in os.listdir(musegan_checkpoint_path) if re.match(r"musegan_epoch_(\d{2})\.h5", f)]
 
+        if checkpoint_files:
+            checkpoint_epochs = [int(re.search(r"musegan_epoch_(\d{2})\.h5", f).group(1)) for f in checkpoint_files]
+            latest_epoch = max(checkpoint_epochs)
+            latest_checkpoint = os.path.join(musegan_checkpoint_path, f"musegan_epoch_{latest_epoch:02d}.h5")
 
-trained_model = False
+    trained_model = False
 
-# Check if trained model already exists
-if os.path.exists(trained_musegan_path):
-# if False:
-    musegan = tf.keras.models.load_model(trained_musegan_path)
-    print("MuseGAN model successfully loaded.")
-    trained_model = True
+    # Check if trained model already exists
+    if os.path.exists(trained_musegan_path):
+    # if False:
+        musegan = tf.keras.models.load_model(trained_musegan_path)
+        print("MuseGAN model successfully loaded.")
+        trained_model = True
 
-elif latest_checkpoint and os.path.exists(latest_checkpoint):
-    musegan = tf.keras.models.load_model(latest_checkpoint)
-    print(f"MuseGAN model successfully loaded from checkpoint at epoch {latest_epoch}.")
-else:
-    musegan = build_musegan()
-    print("MuseGAN model not found, building new MuseGAN model...")
+    elif latest_checkpoint and os.path.exists(latest_checkpoint):
+        musegan = tf.keras.models.load_model(latest_checkpoint)
+        print(f"MuseGAN model successfully loaded from checkpoint at epoch {latest_epoch}.")
+    else:
+        musegan = build_musegan()
+        print("MuseGAN model not found, building new MuseGAN model...")
 
-if not trained_model:
-    # Build MuseGAN Model
-    print("MuseGAN model summary:")
-    musegan.summary()
+    if not trained_model:
+        # Build MuseGAN Model
+        print("MuseGAN model summary:")
+        musegan.summary()
 
-    callbacks = [
-        ModelCheckpoint(filepath=musegan_checkpoint_name, save_best_only=False, save_weights_only=False, verbose=1),
-        CSVLogger(musegan_log_path, append=True)
-    ]
+        callbacks = [
+            ModelCheckpoint(filepath=musegan_checkpoint_name, save_best_only=False, save_weights_only=False, verbose=1),
+            CSVLogger(musegan_log_path, append=True)
+        ]
 
-    # Train MuseGAN Model
-    print("MuseGAN train start...")
-    lakh_history = musegan.fit(
-        train_batch,
-        steps_per_epoch=steps_per_epoch,
-        epochs=epochs,
-        batch_size=batch_size,
-        validation_data=valid_batch,
-        validation_steps=validation_steps,
-        callbacks=callbacks,
-        initial_epoch=latest_epoch
-    )
+        # Train MuseGAN Model
+        print("MuseGAN train start...")
+        try:
+            lakh_history = musegan.fit(
+                train_batch,
+                steps_per_epoch=steps_per_epoch,
+                epochs=epochs,
+                batch_size=batch_size,
+                validation_data=valid_batch,
+                validation_steps=validation_steps,
+                callbacks=callbacks,
+                initial_epoch=latest_epoch
+            )
 
-    musegan.save(musegan_save_path)
+            musegan.save(musegan_save_path)
+        except tf.errors.ResourceExhaustedError:
+            print("OOM Error detected. Restarting training from last checkpoint...")
+            os.execv(sys.executable, [sys.executable] + sys.argv)
 
 plot_training_history(musegan_log_path, result_plot_path)
 
