@@ -36,53 +36,13 @@ def build_musegan(input_shape=(512, 128), num_tracks=4):
         processed.append(x)
 
     # Merge the tracks into a single piano roll
-    output = Concatenate(axis=-1)(processed)
-    model = Model(inputs=inputs, outputs=output)
-    model.compile(optimizer="adam", loss="binary_crossentropy", metrics=["accuracy"])
+    # output = Concatenate(axis=-1)(processed)
+    model = Model(inputs=inputs, outputs=processed)
+    model.compile(optimizer="adam", loss=["binary_crossentropy"]*4,
+                  loss_weights=[1.0, 0.8, 0.4, 0.8], metrics=["accuracy"])
     return model
 
 # Function to load all preprocessed Lakh MIDI data in batch
-def load_lakh_data(dataset_path, batch_size, data_type, split_ratio=0.8):
-    # Infinite loop for generator
-    print("Loading .tar.gz file...")
-    with tarfile.open(dataset_path, "r:gz") as tar:
-        files = [member for member in tar.getmembers() if member.name.endswith(".npy")]
-        split_index = int(len(files) * split_ratio)
-
-        file_list = files[:split_index] if data_type == "train" else files[split_index:]
-
-        print(f"Total files in archive: {len(files)}")
-        print(f"Using {len(file_list)} files for {data_type}")
-        batch_count = 0
-        for i in range(0, len(file_list), batch_size):
-            batch_files = file_list[i:i + batch_size]
-            batch_inputs = []
-            batch_count += 1
-            print(f"\nLoading batch {batch_count}...")
-
-            for file in batch_files:
-                try:
-                    ext_file = tar.extractfile(file)
-                    buf = io.BytesIO(ext_file.read())
-                    data = np.load(buf)
-
-                    batch_inputs.append([data["drum"], data["bass"], data["pad"], data["lead"]])
-                    print(f"Loaded file: {file}")
-
-                except Exception as e:
-                    print(f"Failed to process {file}: {e}")
-                    continue
-
-            if len(batch_inputs) == 0:
-                # print(f"Batch {batch_count + 1} is empty, skipping...")
-                continue
-
-            # Transpose "list of samples" to "list of tracks"
-            batch = list(zip(*batch_inputs))
-            inputs = [np.array(track) for track in batch]
-            output = np.concatenate(inputs, axis=-1)
-            yield tuple(inputs), output
-
 def load_data_from_directory(data_dir, file_list, batch_size):
     while True:
         for i in range(0, len(file_list), batch_size):
@@ -99,8 +59,8 @@ def load_data_from_directory(data_dir, file_list, batch_size):
 
             batch = list(zip(*batch_inputs))
             inputs = [np.array(track) for track in batch]
-            output = np.concatenate(inputs, axis=-1)
-            yield tuple(inputs), output
+            outputs = [np.array(track) for track in batch]
+            yield inputs, outputs
 
 # Function to plot training history
 def plot_training_history(csv_path, save_path):
@@ -133,24 +93,25 @@ def plot_training_history(csv_path, save_path):
     plt.show()
     plt.close()
 
-# Paths
-musegan_save_path = "../../trained_model/musegan.h5"
-musegan_checkpoint_path = "../../trained_model/musegan_checkpoints"
-musegan_checkpoint_name = os.path.join(musegan_checkpoint_path, "musegan_epoch_{epoch:02d}.h5")
-musegan_log_path = "../../trained_model/musegan_training_log.csv"
-trained_musegan_path = "../../trained_model/musegan.h5"
-training_history_path = "../../trained_model/training_history.json"
-history = {"loss": [], "accuracy": [], "val_loss": [], "val_accuracy": []}
-
-# lakh_dataset_path = "../../../dataset/Preprocessed/Lakh/MultiTrack-ver3.tar.gz"
-lakh_data_path = "../../../dataset/Preprocessed/Lakh/MultiTrack"
-result_plot_path = "../../../Result/Performance/performance.png"
-
-# Define model parameters
-batch_size = 32
-epochs = 20
-
 if __name__ == "__main__":
+
+    # Paths
+    musegan_save_path = "../../trained_model/musegan.h5"
+    musegan_checkpoint_path = "../../trained_model/musegan_checkpoints"
+    musegan_checkpoint_name = os.path.join(musegan_checkpoint_path, "musegan_epoch_{epoch:02d}.h5")
+    musegan_log_path = "../../trained_model/musegan_training_log.csv"
+    trained_musegan_path = "../../trained_model/musegan.h5"
+    training_history_path = "../../trained_model/training_history.json"
+    history = {"loss": [], "accuracy": [], "val_loss": [], "val_accuracy": []}
+
+    # lakh_dataset_path = "../../../dataset/Preprocessed/Lakh/MultiTrack-ver3.tar.gz"
+    lakh_data_path = "../../../dataset/Preprocessed/Lakh/MultiTrack"
+    result_plot_path = "../../../Result/Performance/performance.png"
+
+    # Define model parameters
+    batch_size = 32
+    epochs = 20
+
     try:
         if os.path.exists(training_history_path):
             with open(training_history_path, "r") as f:
