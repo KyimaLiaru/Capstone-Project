@@ -2,6 +2,7 @@ import os
 
 import numpy as np
 import tensorflow as tf
+import pretty_midi
 from tensorflow.keras.models import Sequential, Model
 import matplotlib.pyplot as plt
 
@@ -65,7 +66,7 @@ def visualize_piano_roll(drum, bass, pad, lead, save_path):
     print(f"Saved combined roll to {combined_path}.")
 
     fig, axes = plt.subplots(2, 2, figsize=(14, 8))
-    rolls = [drum[:100], bass[:100], pad[:100], lead[:100]]
+    rolls = [drum, bass, pad, lead]
     titles = ["Drum", "Bass", "Pad", "Lead"]
 
     for ax, roll, title in zip(axes.flat, rolls, titles):
@@ -78,6 +79,40 @@ def visualize_piano_roll(drum, bass, pad, lead, save_path):
     plt.savefig(grid_path, dpi=300)
     plt.close()
     print(f"Saved grid roll to {grid_path}.")
+
+def piano_roll_to_instrument(roll, program=0, is_drum=False):
+    inst = pretty_midi.Instrument(program=program, is_drum=is_drum)
+    fs = 16  # frames per second
+    time_step = 1.0 / fs
+    for pitch in range(roll.shape[1]):
+        active = False
+        note_on = 0
+        for t in range(roll.shape[0]):
+            if roll[t, pitch] > 0 and not active:
+                active = True
+                note_on = t
+            elif roll[t, pitch] == 0 and active:
+                note_off = t
+                start = note_on * time_step
+                end = note_off * time_step
+                inst.notes.append(pretty_midi.Note(velocity=100, pitch=pitch, start=start, end=end))
+                active = False
+        if active:
+            end = roll.shape[0] * time_step
+            inst.notes.append(pretty_midi.Note(velocity=100, pitch=pitch, start=note_on * time_step, end=end))
+    return inst
+
+def save_tracks_to_midi(drum, bass, pad, lead, output_path):
+    midi = pretty_midi.PrettyMIDI()
+    midi.instruments.append(piano_roll_to_instrument(drum, is_drum=True))
+    midi.instruments.append(piano_roll_to_instrument(bass, program=np.random.shuffle(list([range(32, 40)]))))
+    midi.instruments.append(piano_roll_to_instrument(pad,  program=np.random.shuffle(list([range(0, 8)]))))
+    midi.instruments.append(piano_roll_to_instrument(lead, program=np.random.shuffle(list([range(40, 96)]))))
+    if not os.path.exists(output_path):
+        os.makedirs(output_path)
+    output_file = os.path.join(output_path, )
+    midi.write(output_path)
+    print(f"Saved generated MIDI to: {output_path}")
 
 # while True:
 #     # Generate piano roll
@@ -101,11 +136,13 @@ def visualize_piano_roll(drum, bass, pad, lead, save_path):
 #     visualize_piano_roll(generated_piano_roll, i, image_path)
 
 # Load MuseGAN model
-musegan_save_path = "../../trained_model/musegan_checkpoints/musegan_epoch_15.h5"
+musegan_save_path = "../../trained_model/musegan.h5"
 figure_path = "../Result/Rolls"
+midi_path = "../Result/MIDI"
 
 musegan = tf.keras.models.load_model(musegan_save_path)
 print("Model successfully loaded.")
 
 drum, bass, pad, lead = generate_piano_roll(musegan)
 visualize_piano_roll(drum, bass, pad, lead, figure_path)
+save_tracks_to_midi(drum, bass, pad, lead, midi_path)
