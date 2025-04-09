@@ -28,6 +28,8 @@ def process_lakh_data(file):
         pad = extract_instrument_roll(pm, range(0, 8))
         bass = extract_instrument_roll(pm, range(32, 40))
         drum = extract_instrument_roll(pm, [], drum=True)
+        if np.sum(drum) == 0:
+            print("No drum data")
 
 
         # Randomly select a melodic instrument
@@ -77,8 +79,8 @@ with tarfile.open(lakh_dataset_path, "r:gz") as tar:
             file = tar.extractfile(member)
             if file is not None:
                 result = process_lakh_data(member.name)
-                if np.sum(result["drum"]) == 0:
-                    print("No drum data in", file)
+                # if np.sum(result["drum"]) == 0:
+                #     print("No drum data in", file)
 
                 if result is not None:
                     # Save the preprocessed data
