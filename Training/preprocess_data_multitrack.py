@@ -16,16 +16,24 @@ def extract_instrument_roll(pm, program_range, drum=False):
     for inst in pm.instruments:
         if drum != inst.is_drum:
             continue
-        if drum and inst.is_drum:
-            if drum and inst.is_drum:
-                print("found drum instrument")
-                for note in inst.notes:
-                    print(
-                        f" → Pitch: {note.pitch}, velocity: {note.velocity}, start: {note.start:.2f}, end: {note.end:.2f}")
-        if drum or inst.program in program_range:
+        if drum:
+            inst_roll = extract_drum_roll(inst)
+        elif inst.program in program_range:
             inst_roll = inst.get_piano_roll(fs=16).T[:512, :128]
             inst_roll = (inst_roll > 0).astype(float)
-            roll = np.maximum(roll, inst_roll)
+        roll = np.maximum(roll, inst_roll)
+    return roll
+
+def extract_drum_roll(inst, fs=16, length=512):
+    roll = np.zeros((length, 128), dtype=float)
+    for note in inst.notes:
+        if note.pitch < 0 or note.pitch > 127:
+            continue
+        start = int(note.start * fs)
+        end = int(note.end * fs)
+        start = max(0, min(start, length - 1))
+        end = max(start + 1, min(end, length))
+        roll[start:end, note.pitch] = 1.0
     return roll
 
 def process_lakh_data(file):
