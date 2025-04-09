@@ -29,10 +29,10 @@ def generate_piano_roll(musegan, sequence_length=512, pitch_range=128):
 
     # Binarize the output (convert to binary piano roll)
     drum_output, bass_output, pad_output, lead_output = np.split(output, 4, axis=-1)
-    drum_output = (drum_output > 0.5).astype(np.float32)
-    bass_output = (bass_output > 0.5).astype(np.float32)
-    pad_output = (pad_output > 0.5).astype(np.float32)
-    lead_output = (lead_output > 0.5).astype(np.float32)
+    drum_output = (drum_output > 0.2).astype(np.float32)
+    bass_output = (bass_output > 0.2).astype(np.float32)
+    pad_output = (pad_output > 0.7).astype(np.float32)
+    lead_output = (lead_output > 0.2).astype(np.float32)
     print(np.max(bass_output))
 
 
