@@ -29,11 +29,10 @@ def generate_piano_roll(musegan, sequence_length=512, pitch_range=128):
 
     # Binarize the output (convert to binary piano roll)
     drum_output, bass_output, pad_output, lead_output = np.split(output, 4, axis=-1)
-    drum_output = (drum_output > 0.2).astype(np.float32)
-    bass_output = (bass_output > 0.2).astype(np.float32)
-    pad_output = (pad_output > 0.7).astype(np.float32)
-    lead_output = (lead_output > 0.2).astype(np.float32)
-    print(np.max(bass_output))
+    drum_output = (drum_output > 0.1).astype(np.float32)
+    bass_output = (bass_output > 0.3).astype(np.float32)
+    pad_output = (pad_output > 0.6).astype(np.float32)
+    lead_output = (lead_output > 0.1).astype(np.float32)
 
 
     # piano_roll = (piano_roll > 0.5).astype(int)
@@ -137,7 +136,7 @@ def save_tracks_to_midi(drum, bass, pad, lead, output_path, count=1):
 #     visualize_piano_roll(generated_piano_roll, i, image_path)
 
 # Load MuseGAN model
-musegan_save_path = "../../trained_model/musegan_checkpoints/musegan_epoch_15.h5"
+musegan_save_path = "../../trained_model/musegan_checkpoints/musegan_epoch_16.h5"
 # musegan_save_path = "../../trained_model/musegan.h5"
 figure_path = "../Result/Rolls"
 midi_path = "../Result/MIDI"
