@@ -40,7 +40,7 @@ def generate_piano_roll(musegan, sequence_length=512, pitch_range=128):
     return drum_output, bass_output, pad_output, lead_output
 
 
-def visualize_piano_roll(drum, bass, pad, lead, save_path):
+def visualize_piano_roll(drum, bass, pad, lead, save_path, count):
     """
     Visualizes a piano roll using a heatmap.
 
@@ -51,8 +51,8 @@ def visualize_piano_roll(drum, bass, pad, lead, save_path):
     """
 
     os.makedirs(save_path, exist_ok=True)
-    combined_path = os.path.join(save_path, "combined.png")
-    grid_path = os.path.join(save_path, "grid.png")
+    combined_path = os.path.join(save_path, f"combined_{count:02d}.png")
+    grid_path = os.path.join(save_path, f"grid_{count:02d}.png")
 
     combined_roll = np.vstack([drum[:100].T, bass[:100].T, pad[:100].T, lead[:100].T])
     plt.figure(figsize=(10, 10))
@@ -103,7 +103,7 @@ def piano_roll_to_instrument(roll, program=0, is_drum=False):
             inst.notes.append(pretty_midi.Note(velocity=100, pitch=pitch, start=start, end=end))
     return inst
 
-def save_tracks_to_midi(drum, bass, pad, lead, output_path):
+def save_tracks_to_midi(drum, bass, pad, lead, output_path, count=1):
     midi = pretty_midi.PrettyMIDI()
     midi.instruments.append(piano_roll_to_instrument(drum, is_drum=True))
     midi.instruments.append(piano_roll_to_instrument(bass, program=np.random.choice(range(32, 40))))
@@ -111,7 +111,7 @@ def save_tracks_to_midi(drum, bass, pad, lead, output_path):
     midi.instruments.append(piano_roll_to_instrument(lead, program=np.random.choice(range(40, 96))))
     if not os.path.exists(output_path):
         os.makedirs(output_path)
-    output_file = os.path.join(output_path, "midi.mid")
+    output_file = os.path.join(output_path, f"midi_{count:02d}.mid")
     midi.write(output_file)
     print(f"Saved generated MIDI to: {output_file}")
 
@@ -143,7 +143,7 @@ midi_path = "../Result/MIDI"
 
 musegan = tf.keras.models.load_model(musegan_save_path)
 print("Model successfully loaded.")
-
-drum, bass, pad, lead = generate_piano_roll(musegan)
-visualize_piano_roll(drum, bass, pad, lead, figure_path)
-save_tracks_to_midi(drum, bass, pad, lead, midi_path)
+for i in range(1, 11):
+    drum, bass, pad, lead = generate_piano_roll(musegan)
+    visualize_piano_roll(drum, bass, pad, lead, figure_path, i)
+    save_tracks_to_midi(drum, bass, pad, lead, midi_path, i)
