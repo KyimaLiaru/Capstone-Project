@@ -16,6 +16,8 @@ def extract_instrument_roll(pm, program_range, drum=False):
     for inst in pm.instruments:
         if drum != inst.is_drum:
             continue
+        if drum and inst.is_drum:
+            print("found drum instrument for drum track")
         if drum or inst.program in program_range:
             inst_roll = inst.get_piano_roll(fs=16).T[:512, :128]
             inst_roll = (inst_roll > 0).astype(float)
