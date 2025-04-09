@@ -43,8 +43,6 @@ def process_lakh_data(file):
         pad = extract_instrument_roll(pm, range(0, 8))
         bass = extract_instrument_roll(pm, range(32, 40))
         drum = extract_instrument_roll(pm, [], drum=True)
-        if np.sum(drum) == 0:
-            print("No drum data")
 
 
         # Randomly select a melodic instrument
