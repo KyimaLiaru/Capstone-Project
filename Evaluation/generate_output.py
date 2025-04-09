@@ -29,10 +29,12 @@ def generate_piano_roll(musegan, sequence_length=512, pitch_range=128):
 
     # Binarize the output (convert to binary piano roll)
     drum_output, bass_output, pad_output, lead_output = np.split(output, 4, axis=-1)
-    drum_output = (drum_output > 0.5).astype(int)
-    bass_output = (bass_output > 0.5).astype(int)
-    pad_output = (pad_output > 0.5).astype(int)
-    lead_output = (lead_output > 0.5).astype(int)
+    drum_output = (drum_output > 0.5).astype(np.float32)
+    bass_output = (bass_output > 0.5).astype(np.float32)
+    pad_output = (pad_output > 0.5).astype(np.float32)
+    lead_output = (lead_output > 0.5).astype(np.float32)
+    print(np.max(bass_output))
+
 
     # piano_roll = (piano_roll > 0.5).astype(int)
     return drum_output, bass_output, pad_output, lead_output
@@ -91,28 +93,22 @@ def piano_roll_to_instrument(roll, program=0, is_drum=False):
                 note_on = t
             elif roll[t, pitch] == 0 and active:
                 note_off = t
-                inst.notes.append(pretty_midi.Note(
-                    velocity=int(100),
-                    pitch=int(pitch),
-                    start=float(note_on * time_step),
-                    end=float(note_off * time_step)
-                ))
+                start = note_on * time_step
+                end = note_off * time_step
+                inst.notes.append(pretty_midi.Note(velocity=100, pitch=pitch, start=start, end=end))
                 active = False
         if active:
-            inst.notes.append(pretty_midi.Note(
-                velocity=int(100),
-                pitch=int(pitch),
-                start=float(note_on * time_step),
-                end=float(roll.shape[0] * time_step)
-            ))
+            start = note_on * time_step
+            end = roll.shape[0] * time_step
+            inst.notes.append(pretty_midi.Note(velocity=100, pitch=pitch, start=start, end=end))
     return inst
 
 def save_tracks_to_midi(drum, bass, pad, lead, output_path):
     midi = pretty_midi.PrettyMIDI()
     midi.instruments.append(piano_roll_to_instrument(drum, is_drum=True))
-    midi.instruments.append(piano_roll_to_instrument(bass, program=np.random.shuffle(list([range(32, 40)]))))
-    midi.instruments.append(piano_roll_to_instrument(pad,  program=np.random.shuffle(list([range(0, 8)]))))
-    midi.instruments.append(piano_roll_to_instrument(lead, program=np.random.shuffle(list([range(40, 96)]))))
+    midi.instruments.append(piano_roll_to_instrument(bass, program=np.random.choice(range(32, 40))))
+    midi.instruments.append(piano_roll_to_instrument(pad,  program=np.random.choice(range(0, 8))))
+    midi.instruments.append(piano_roll_to_instrument(lead, program=np.random.choice(range(40, 96))))
     if not os.path.exists(output_path):
         os.makedirs(output_path)
     output_file = os.path.join(output_path, )
