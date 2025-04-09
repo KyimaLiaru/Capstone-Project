@@ -111,7 +111,7 @@ def save_tracks_to_midi(drum, bass, pad, lead, output_path):
     midi.instruments.append(piano_roll_to_instrument(lead, program=np.random.choice(range(40, 96))))
     if not os.path.exists(output_path):
         os.makedirs(output_path)
-    output_file = os.path.join(output_path, )
+    output_file = os.path.join(output_path, "midi.mid")
     midi.write(output_path)
     print(f"Saved generated MIDI to: {output_path}")
 
