@@ -71,14 +71,13 @@ def plot_training_history(csv_path, save_path):
     plt.subplot(1, 2, 1)
     track_labels = ["drum", "bass", "pad", "lead"]
     for i, label in enumerate(track_labels):
-        if 'reshape_accuracy' in df.columns:
-            plt.plot(df['reshape_accuracy'], label=f'{label.capitalize()} Accuracy')
-        elif f'reshape_{i}_accuracy' in df.columns:
-            plt.plot(df[f'reshape_{i}_accuracy'], label=f'{label.capitalize()} Accuracy')
-        elif 'val_reshape_accuracy' in df.columns:
-            # plt.plot(df['val_reshape_accuracy'], linestyle='--', label=f'{label.capitalize()} Val Accuracy')
-        elif f'val_reshape_{i}_accuracy' in df.columns:
-            plt.plot(df[f'val_reshape_{i}_accuracy'], linestyle='--', label=f'{label.capitalize()} Val Accuracy')
+        acc_key = 'reshape_accuracy' if i == 0 else f'reshape_{i}_accuracy'
+        val_acc_key = 'val_reshape_accuracy' if i == 0 else f'val_reshape_{i}_accuracy'
+
+        if acc_key in df.columns:
+            plt.plot(df[acc_key], label=f'{label.capitalize()} Accuracy')
+        if val_acc_key in df.columns:
+            plt.plot(df[val_acc_key], linestyle='--', label=f'{label.capitalize()} Val Accuracy')
     plt.xlabel('Epoch')
     plt.ylabel('Accuracy')
     plt.title('Model Accuracy')
@@ -88,14 +87,13 @@ def plot_training_history(csv_path, save_path):
     # Plot loss
     plt.subplot(1, 2, 2)
     for i, label in enumerate(track_labels):
-        if 'reshape_loss' in df.columns:
-            plt.plot(df['reshape_loss'], label=f'{label.capitalize()} Loss')
-        elif f'reshape_{i}_loss' in df.columns:
-            plt.plot(df[f'reshape_{i}_loss'], label=f'{label.capitalize()} Loss')
-        elif 'val_reshape_loss' in df.columns:
-            # plt.plot(df['val_reshape_loss'], linestyle='--', label=f'{label.capitalize()} Val Loss')
-        elif f'val_reshape_{i}_loss' in df.columns:
-            plt.plot(df[f'val_reshape_{i}_loss'], linestyle='--', label=f'{label.capitalize()} Val Loss')
+        loss_key = 'reshape_loss' if i == 0 else f'reshape_{i}_loss'
+        val_loss_key = 'val_reshape_loss' if i == 0 else f'val_reshape_{i}_loss'
+
+        if loss_key in df.columns:
+            plt.plot(df[loss_key], label=f'{label.capitalize()} Loss')
+        if val_loss_key in df.columns:
+            plt.plot(df[val_loss_key], linestyle='--', label=f'{label.capitalize()} Val Loss')
 
     plt.xlabel('Epoch')
     plt.ylabel('Loss')
