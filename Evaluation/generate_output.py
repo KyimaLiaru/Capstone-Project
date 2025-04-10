@@ -150,7 +150,7 @@ midi_path = "../Result/MIDI"
 
 musegan = tf.keras.models.load_model(musegan_save_path)
 musegan2 = tf.keras.models.load_model(musegan_save_path_2)
-# musegan3 = tf.keras.models.load_model(musegan_save_path_3)
+musegan3 = tf.keras.models.load_model(musegan_save_path_3)
 print("Model successfully loaded.")
 for i in range(1, 5):
     drum, bass, pad, lead = generate_piano_roll(musegan)
