@@ -40,7 +40,7 @@ def build_musegan(input_shape=(512, 128), num_tracks=4):
     # output = Concatenate(axis=-1)(processed)
     model = Model(inputs=inputs, outputs=processed)
     model.compile(optimizer="adam", loss=["binary_crossentropy"]*4,
-                  loss_weights=[1.0, 0.8, 0.4, 0.8],
+                  loss_weights=[1.0, 1.2, 0.5, 1.5],
                   metrics=[AUC(name="auc"), Precision(), Recall()]
     )
     return model
@@ -65,30 +65,30 @@ def load_data_from_directory(data_dir, file_list, batch_size):
             outputs = [np.array(track) for track in batch]
             yield inputs, outputs
 
-# Function to plot training history
+# Function to plot AUC and loss per track
 def plot_training_history(csv_path, save_path):
     df = pd.read_csv(csv_path)
-    plt.figure(figsize=(12, 5))
+    plt.figure(figsize=(12, 10))
 
-    # Plot accuracy
-    plt.subplot(1, 2, 1)
+    # Plot each track AUC
+    plt.subplot(2, 1, 1)
     track_labels = ["drum", "bass", "pad", "lead"]
     for i, label in enumerate(track_labels):
-        acc_key = 'reshape_accuracy' if i == 0 else f'reshape_{i}_accuracy'
-        val_acc_key = 'val_reshape_accuracy' if i == 0 else f'val_reshape_{i}_accuracy'
+        auc_key = 'reshape_auc' if i == 0 else f'reshape_{i}_auc'
+        val_auc_key = 'val_reshape_auc' if i == 0 else f'val_reshape_{i}_auc'
 
-        if acc_key in df.columns:
-            plt.plot(df[acc_key], label=f'{label.capitalize()} Accuracy')
-        if val_acc_key in df.columns:
-            plt.plot(df[val_acc_key], linestyle='--', label=f'{label.capitalize()} Val Accuracy')
+        if auc_key in df.columns:
+            plt.plot(df[auc_key], label=f'{label.capitalize()} AUC')
+        if val_auc_key in df.columns:
+            plt.plot(df[val_auc_key], linestyle='--', label=f'{label.capitalize()} Val AUC')
+
     plt.xlabel('Epoch')
-    plt.ylabel('Accuracy')
-    plt.title('Model Accuracy')
+    plt.ylabel('AUC')
+    plt.title('Track-wise AUC')
     plt.legend()
-    plt.xticks(range(0, 21, 4))
 
-    # Plot loss
-    plt.subplot(1, 2, 2)
+    # Plot each track loss
+    plt.subplot(2, 1, 2)
     for i, label in enumerate(track_labels):
         loss_key = 'reshape_loss' if i == 0 else f'reshape_{i}_loss'
         val_loss_key = 'val_reshape_loss' if i == 0 else f'val_reshape_{i}_loss'
@@ -100,45 +100,43 @@ def plot_training_history(csv_path, save_path):
 
     plt.xlabel('Epoch')
     plt.ylabel('Loss')
-    plt.title('Model Loss')
+    plt.title('Track-wise Loss')
     plt.legend()
-    plt.xticks(range(0, 21, 4))
 
     plt.tight_layout()
     plt.savefig(save_path, dpi=300)
-    print(f"Saved training history to {save_path}")
+    print(f"Saved training AUC and Loss history to {save_path}")
     plt.show()
     plt.close()
 
+# Function to plot average AUC and loss
 def plot_average_history(csv_path, save_path):
     df = pd.read_csv(csv_path)
     plt.figure(figsize=(12, 5))
 
-    # Compute average accuracy
-    acc_cols = ['reshape_accuracy'] + [f'reshape_{i}_accuracy' for i in range(1, 4)]
-    val_acc_cols = ['val_reshape_accuracy'] + [f'val_reshape_{i}_accuracy' for i in range(1, 4)]
-    df['avg_accuracy'] = df[acc_cols].mean(axis=1)
-    df['avg_val_accuracy'] = df[val_acc_cols].mean(axis=1)
+    auc_cols = ['reshape_auc'] + [f'reshape_{i}_auc' for i in range(1, 4)]
+    val_auc_cols = ['val_reshape_auc'] + [f'val_reshape_{i}_auc' for i in range(1, 4)]
+    df['avg_auc'] = df[auc_cols].mean(axis=1)
+    df['avg_val_auc'] = df[val_auc_cols].mean(axis=1)
 
-    # Compute average loss
     loss_cols = ['reshape_loss'] + [f'reshape_{i}_loss' for i in range(1, 4)]
     val_loss_cols = ['val_reshape_loss'] + [f'val_reshape_{i}_loss' for i in range(1, 4)]
     df['avg_loss'] = df[loss_cols].mean(axis=1)
     df['avg_val_loss'] = df[val_loss_cols].mean(axis=1)
 
-    # Plot average accuracy
+    # Plot average AUC
     plt.subplot(1, 2, 1)
-    plt.plot(df['avg_accuracy'], label='Average Train Accuracy')
-    plt.plot(df['avg_val_accuracy'], label='Average Val Accuracy', linestyle='--')
+    plt.plot(df['avg_auc'], label='Avg Train AUC')
+    plt.plot(df['avg_val_auc'], linestyle='--', label='Avg Val AUC')
     plt.xlabel('Epoch')
-    plt.ylabel('Accuracy')
-    plt.title('Average Accuracy Across Tracks')
+    plt.ylabel('AUC')
+    plt.title('Average AUC Across Tracks')
     plt.legend()
 
     # Plot average loss
     plt.subplot(1, 2, 2)
-    plt.plot(df['avg_loss'], label='Average Train Loss')
-    plt.plot(df['avg_val_loss'], label='Average Val Loss', linestyle='--')
+    plt.plot(df['avg_loss'], label='Avg Train Loss')
+    plt.plot(df['avg_val_loss'], linestyle='--', label='Avg Val Loss')
     plt.xlabel('Epoch')
     plt.ylabel('Loss')
     plt.title('Average Loss Across Tracks')
@@ -147,9 +145,10 @@ def plot_average_history(csv_path, save_path):
     plt.tight_layout()
     avg_path = save_path.replace(".png", "_avg.png")
     plt.savefig(avg_path, dpi=300)
-    print(f"Saved average training history to {avg_path}")
+    print(f"Saved average training AUC and Loss history to {avg_path}")
     plt.show()
     plt.close()
+
 
 if __name__ == "__main__":
 
