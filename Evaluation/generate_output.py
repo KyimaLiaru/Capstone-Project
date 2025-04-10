@@ -19,20 +19,26 @@ def generate_piano_roll(musegan, sequence_length=512, pitch_range=128):
     bass_input = np.random.rand(1, sequence_length, pitch_range)
     pad_input = np.random.rand(1, sequence_length, pitch_range)
     lead_input = np.random.rand(1, sequence_length, pitch_range)
-    input = [drum_input, bass_input, pad_input, lead_input]
+    inputs = [drum_input, bass_input, pad_input, lead_input]
 
     # Generate piano roll
-    output = musegan.predict(input)
+    drum_output, bass_output, pad_output, lead_output = musegan.predict(inputs)
 
     # Remove batch dimension
-    output = output[0]
+    drum_output = drum_output[0]
+    bass_output = bass_output[0]
+    pad_output = pad_output[0]
+    lead_output = lead_output[0]
 
     # Binarize the output (convert to binary piano roll)
-    drum_output, bass_output, pad_output, lead_output = np.split(output, 4, axis=-1)
-    drum_output = (drum_output > 0.1).astype(np.float32)
-    bass_output = (bass_output > 0.25).astype(np.float32)
-    pad_output = (pad_output > 0.5).astype(np.float32)
-    lead_output = (lead_output > 0.05).astype(np.float32)
+    # drum_output = (drum_output > 0.1).astype(np.float32)
+    # bass_output = (bass_output > 0.25).astype(np.float32)
+    # pad_output = (pad_output > 0.5).astype(np.float32)
+    # lead_output = (lead_output > 0.05).astype(np.float32)
+    drum_output = (drum_output > 0.5).astype(int)
+    bass_output = (bass_output > 0.5).astype(int)
+    pad_output = (pad_output > 0.5).astype(int)
+    lead_output = (lead_output > 0.5).astype(int)
 
 
     # piano_roll = (piano_roll > 0.5).astype(int)
