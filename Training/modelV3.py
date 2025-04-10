@@ -75,7 +75,7 @@ def plot_training_history(csv_path, save_path):
             plt.plot(df[f'reshape_accuracy'], label=f'{label.capitalize()} Accuracy')
         else:
             plt.plot(df[f'reshape_{i}_accuracy'], label=f'{label.capitalize()} Accuracy')
-        if f'val_reshape_accuracy' in df.columns:
+        if 'val_reshape_accuracy' in df.columns:
             plt.plot(df[f'val_reshape_accuracy'], linestyle='--', label=f'{label.capitalize()} Val Accuracy')
         elif f'val_reshape_{i}_accuracy' in df.columns:
             plt.plot(df[f'val_reshape_{i}_accuracy'], linestyle='--', label=f'{label.capitalize()} Val Accuracy')
