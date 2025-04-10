@@ -131,12 +131,11 @@ if __name__ == "__main__":
         train_batch = load_data_from_directory(lakh_data_path, train_files, batch_size)
         valid_batch = load_data_from_directory(lakh_data_path, valid_files, batch_size)
 
-        checkpoint_files = [f for f in os.listdir(musegan_checkpoint_path) if re.match(r"musegan_epoch_(\d{2})\.h5", f)]
-
         latest_epoch = 0
         latest_checkpoint = None
 
-        if checkpoint_files:
+        if os.path.exists(musegan_checkpoint_path):
+            checkpoint_files = [f for f in os.listdir(musegan_checkpoint_path) if re.match(r"musegan_epoch_(\d{2})\.h5", f)]
             checkpoint_epochs = [int(re.search(r"musegan_epoch_(\d{2})\.h5", f).group(1)) for f in checkpoint_files]
             latest_epoch = max(checkpoint_epochs)
             latest_checkpoint = os.path.join(musegan_checkpoint_path, f"musegan_epoch_{latest_epoch:02d}.h5")

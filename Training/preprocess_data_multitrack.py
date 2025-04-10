@@ -85,8 +85,8 @@ with tarfile.open(lakh_dataset_path, "r:gz") as tar:
             prefix = "".join(prefix_parts[1:4])  # three directory levels, typically alphabet letters
             basename = os.path.basename(member.name).replace(".mid", ".npy")
             output_file = os.path.join(lakh_preprocess_output_path, f"{prefix}_{basename}")
-            # if os.path.exists(output_file):
-            #     continue
+            if os.path.exists(output_file):
+                continue
 
             # Extract process the data from the tar.gz file
             file = tar.extractfile(member)
