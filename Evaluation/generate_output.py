@@ -136,14 +136,25 @@ def save_tracks_to_midi(drum, bass, pad, lead, output_path, count=1):
 #     visualize_piano_roll(generated_piano_roll, i, image_path)
 
 # Load MuseGAN model
-musegan_save_path = "../../trained_model/musegan_checkpoints/musegan_epoch_16.h5"
-# musegan_save_path = "../../trained_model/musegan.h5"
+musegan_save_path = "../../trained_model/musegan_checkpoints/musegan_epoch_01.h5"
+musegan_save_path_2 = "../../trained_model/musegan_checkpoints/musegan_epoch_10.h5"
+musegan_save_path_3 = "../../trained_model/musegan.h5"
 figure_path = "../Result/Rolls"
 midi_path = "../Result/MIDI"
 
 musegan = tf.keras.models.load_model(musegan_save_path)
+musegan2 = tf.keras.models.load_model(musegan_save_path_2)
+musegan3 = tf.keras.models.load_model(musegan_save_path_3)
 print("Model successfully loaded.")
-for i in range(1, 11):
+for i in range(1, 5):
     drum, bass, pad, lead = generate_piano_roll(musegan)
+    visualize_piano_roll(drum, bass, pad, lead, figure_path, i)
+    save_tracks_to_midi(drum, bass, pad, lead, midi_path, i)
+for i in range(5, 9):
+    drum, bass, pad, lead = generate_piano_roll(musegan2)
+    visualize_piano_roll(drum, bass, pad, lead, figure_path, i)
+    save_tracks_to_midi(drum, bass, pad, lead, midi_path, i)
+for i in range(9, 13):
+    drum, bass, pad, lead = generate_piano_roll(musegan3)
     visualize_piano_roll(drum, bass, pad, lead, figure_path, i)
     save_tracks_to_midi(drum, bass, pad, lead, midi_path, i)
