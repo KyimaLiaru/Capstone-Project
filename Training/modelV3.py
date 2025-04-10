@@ -10,6 +10,7 @@ import tensorflow as tf
 from tensorflow.keras.layers import Input, Conv1D, LSTM, Dense, Flatten, Reshape, Dropout, Concatenate
 from tensorflow.keras.models import Sequential, Model
 from tensorflow.keras.callbacks import ModelCheckpoint, CSVLogger
+from tensorflow.keras.metrics import AUC, Precision, Recall
 import pretty_midi
 import matplotlib.pyplot as plt
 import librosa
@@ -39,7 +40,9 @@ def build_musegan(input_shape=(512, 128), num_tracks=4):
     # output = Concatenate(axis=-1)(processed)
     model = Model(inputs=inputs, outputs=processed)
     model.compile(optimizer="adam", loss=["binary_crossentropy"]*4,
-                  loss_weights=[1.0, 0.8, 0.4, 0.8], metrics=["accuracy"])
+                  loss_weights=[1.0, 0.8, 0.4, 0.8],
+                  metrics=[AUC(name="auc"), Precision(), Recall()]
+    )
     return model
 
 # Function to load all preprocessed Lakh MIDI data in batch
