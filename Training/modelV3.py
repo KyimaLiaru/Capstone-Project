@@ -123,7 +123,7 @@ if __name__ == "__main__":
 
     # lakh_dataset_path = "../../../dataset/Preprocessed/Lakh/MultiTrack-ver3.tar.gz"
     lakh_data_path = "../../../dataset/Preprocessed/Lakh/MultiTrack"
-    result_plot_path = "../../../Result/Performance/performance.png"
+    result_plot_path = "../Result/Performance/performance.png"
 
     # Define model parameters
     batch_size = 32
