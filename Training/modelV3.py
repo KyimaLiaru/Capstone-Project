@@ -107,6 +107,47 @@ def plot_training_history(csv_path, save_path):
     plt.show()
     plt.close()
 
+def plot_average_history(csv_path, save_path):
+    df = pd.read_csv(csv_path)
+    plt.figure(figsize=(12, 5))
+
+    # Compute average accuracy
+    acc_cols = ['reshape_accuracy'] + [f'reshape_{i}_accuracy' for i in range(1, 4)]
+    val_acc_cols = ['val_reshape_accuracy'] + [f'val_reshape_{i}_accuracy' for i in range(1, 4)]
+    df['avg_accuracy'] = df[acc_cols].mean(axis=1)
+    df['avg_val_accuracy'] = df[val_acc_cols].mean(axis=1)
+
+    # Compute average loss
+    loss_cols = ['reshape_loss'] + [f'reshape_{i}_loss' for i in range(1, 4)]
+    val_loss_cols = ['val_reshape_loss'] + [f'val_reshape_{i}_loss' for i in range(1, 4)]
+    df['avg_loss'] = df[loss_cols].mean(axis=1)
+    df['avg_val_loss'] = df[val_loss_cols].mean(axis=1)
+
+    # Plot average accuracy
+    plt.subplot(1, 2, 1)
+    plt.plot(df['avg_accuracy'], label='Average Train Accuracy')
+    plt.plot(df['avg_val_accuracy'], label='Average Val Accuracy', linestyle='--')
+    plt.xlabel('Epoch')
+    plt.ylabel('Accuracy')
+    plt.title('Average Accuracy Across Tracks')
+    plt.legend()
+
+    # Plot average loss
+    plt.subplot(1, 2, 2)
+    plt.plot(df['avg_loss'], label='Average Train Loss')
+    plt.plot(df['avg_val_loss'], label='Average Val Loss', linestyle='--')
+    plt.xlabel('Epoch')
+    plt.ylabel('Loss')
+    plt.title('Average Loss Across Tracks')
+    plt.legend()
+
+    plt.tight_layout()
+    avg_path = save_path.replace(".png", "_avg.png")
+    plt.savefig(avg_path, dpi=300)
+    print(f"Saved average training history to {avg_path}")
+    plt.show()
+    plt.close()
+
 if __name__ == "__main__":
 
     # Paths
@@ -121,6 +162,7 @@ if __name__ == "__main__":
     # lakh_dataset_path = "../../../dataset/Preprocessed/Lakh/MultiTrack-ver3.tar.gz"
     lakh_data_path = "../../../dataset/Preprocessed/Lakh/MultiTrack"
     result_plot_path = "../Result/Performance/performance.png"
+    average_result_plot_path = "../Result/Performance/average_performance.png"
 
     # Define model parameters
     batch_size = 32
@@ -190,6 +232,8 @@ if __name__ == "__main__":
             musegan.save(musegan_save_path)
 
         plot_training_history(musegan_log_path, result_plot_path)
+        plot_average_history(musegan_log_path, average_result_plot_path)
+
 
     except tf.errors.ResourceExhaustedError:
         print("OOM Error detected. Restarting training from last checkpoint...")
