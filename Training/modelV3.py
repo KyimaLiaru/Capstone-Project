@@ -76,7 +76,7 @@ def plot_training_history(csv_path, save_path):
         elif f'reshape_{i}_accuracy' in df.columns:
             plt.plot(df[f'reshape_{i}_accuracy'], label=f'{label.capitalize()} Accuracy')
         elif 'val_reshape_accuracy' in df.columns:
-            plt.plot(df[f'val_reshape_accuracy'], linestyle='--', label=f'{label.capitalize()} Val Accuracy')
+            # plt.plot(df['val_reshape_accuracy'], linestyle='--', label=f'{label.capitalize()} Val Accuracy')
         elif f'val_reshape_{i}_accuracy' in df.columns:
             plt.plot(df[f'val_reshape_{i}_accuracy'], linestyle='--', label=f'{label.capitalize()} Val Accuracy')
     plt.xlabel('Epoch')
@@ -93,7 +93,7 @@ def plot_training_history(csv_path, save_path):
         elif f'reshape_{i}_loss' in df.columns:
             plt.plot(df[f'reshape_{i}_loss'], label=f'{label.capitalize()} Loss')
         elif 'val_reshape_loss' in df.columns:
-            plt.plot(df[f'val_reshape_loss'], linestyle='--', label=f'{label.capitalize()} Val Loss')
+            # plt.plot(df['val_reshape_loss'], linestyle='--', label=f'{label.capitalize()} Val Loss')
         elif f'val_reshape_{i}_loss' in df.columns:
             plt.plot(df[f'val_reshape_{i}_loss'], linestyle='--', label=f'{label.capitalize()} Val Loss')
 
