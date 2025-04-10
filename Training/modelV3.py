@@ -71,13 +71,13 @@ def plot_training_history(csv_path, save_path):
     plt.subplot(1, 2, 1)
     track_labels = ["drum", "bass", "pad", "lead"]
     for i, label in enumerate(track_labels):
-        if i == 0:
-            plt.plot(df[f'reshape_accuracy'], label=f'{label.capitalize()} Accuracy')
-        else:
+        if 'reshape_accuracy' in df.columns:
+            plt.plot(df['reshape_accuracy'], label=f'{label.capitalize()} Accuracy')
+        elif f'reshape_{i}_accuracy' in df.columns:
             plt.plot(df[f'reshape_{i}_accuracy'], label=f'{label.capitalize()} Accuracy')
-        if 'val_reshape_accuracy' in df.columns:
+        elif 'val_reshape_accuracy' in df.columns:
             plt.plot(df[f'val_reshape_accuracy'], linestyle='--', label=f'{label.capitalize()} Val Accuracy')
-        else:
+        elif f'val_reshape_{i}_accuracy' in df.columns:
             plt.plot(df[f'val_reshape_{i}_accuracy'], linestyle='--', label=f'{label.capitalize()} Val Accuracy')
     plt.xlabel('Epoch')
     plt.ylabel('Accuracy')
@@ -88,14 +88,13 @@ def plot_training_history(csv_path, save_path):
     # Plot loss
     plt.subplot(1, 2, 2)
     for i, label in enumerate(track_labels):
-        if i == 0:
-            plt.plot(df[f'reshape_loss'], label=f'{label.capitalize()} Loss')
-        else:
+        if 'reshape_loss' in df.columns:
+            plt.plot(df['reshape_loss'], label=f'{label.capitalize()} Loss')
+        elif f'reshape_{i}_loss' in df.columns:
             plt.plot(df[f'reshape_{i}_loss'], label=f'{label.capitalize()} Loss')
-
-        if 'val_reshape_loss' in df.columns:
+        elif 'val_reshape_loss' in df.columns:
             plt.plot(df[f'val_reshape_loss'], linestyle='--', label=f'{label.capitalize()} Val Loss')
-        else:
+        elif f'val_reshape_{i}_loss' in df.columns:
             plt.plot(df[f'val_reshape_{i}_loss'], linestyle='--', label=f'{label.capitalize()} Val Loss')
 
     plt.xlabel('Epoch')
