@@ -124,8 +124,13 @@ def save_tracks_to_npy(drum, bass, pad, lead, output_path, count=1):
     if not os.path.exists(output_path):
         os.makedirs(output_path)
     output_file = os.path.join(output_path, f"npy_{count:02d}.npy")
-    roll = np.stack([drum.T, bass.T, pad.T, lead.T], axis=0)  # shape: (4, 128, 512)
-    np.save(output_file, roll)
+    dict = {
+        "drum": drum.T,
+        "bass": bass.T,
+        "pad": pad.T,
+        "lead": lead.T
+    }
+    np.save(output_file, dict)
     print(f"Saved generated output to: {output_file}")
 
 
