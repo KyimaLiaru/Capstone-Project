@@ -94,9 +94,9 @@ def qualified_notes(piano_roll, min_duration=3):
                     if active:
                         if min_duration <= duration <= STEPS_PER_BAR:
                             qualified += 1
-                            # print(f"  Pitch {pitch}: Qualified note with duration {duration}")
-                        else:
-                            print(f"  Pitch {pitch}: Unqualified note with duration {duration}")
+                            print(f"  Pitch {pitch}: Qualified note with duration {duration}")
+                        # else:
+                            # print(f"  Pitch {pitch}: Unqualified note with duration {duration}")
                         total += duration
                         note_count += 1
                         duration = 0
@@ -105,9 +105,9 @@ def qualified_notes(piano_roll, min_duration=3):
             if active:
                 if min_duration <= duration <= STEPS_PER_BAR:
                     qualified += 1
-                    # print(f"  Pitch {pitch}: Qualified note (end) with duration {duration}")
-                else:
-                    print(f"  Pitch {pitch}: Unqualified note (end) with duration {duration}")
+                    print(f"  Pitch {pitch}: Qualified note (end) with duration {duration}")
+                # else:
+                    # print(f"  Pitch {pitch}: Unqualified note (end) with duration {duration}")
                 total += duration
                 note_count += 1
 
