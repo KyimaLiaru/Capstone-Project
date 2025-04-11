@@ -179,13 +179,12 @@ def print_final_metrics(csv_path):
 if __name__ == "__main__":
 
     # Paths
-    musegan_save_path = "../../trained_model/musegan.h5"
-    musegan_checkpoint_path = "../../trained_model/musegan_checkpoints"
+    musegan_save_path = "../../trained_model/musegan-new/musegan.h5"
+    musegan_checkpoint_path = "../../trained_model/musegan-new/musegan_checkpoints"
     musegan_checkpoint_name = os.path.join(musegan_checkpoint_path, "musegan_epoch_{epoch:02d}.h5")
-    musegan_log_path = "../../trained_model/musegan_training_log.csv"
+    musegan_log_path = "../../trained_model/musegan-new/musegan_training_log.csv"
     trained_musegan_path = "../../trained_model/musegan-new/musegan.h5"
-    training_history_path = "../../trained_model/training_history.json"
-    history = {"loss": [], "accuracy": [], "val_loss": [], "val_accuracy": []}
+    training_history_path = "../../trained_model/musegan-new/training_history.json"
 
     # lakh_dataset_path = "../../../dataset/Preprocessed/Lakh/MultiTrack-ver3.tar.gz"
     lakh_data_path = "../../../dataset/Preprocessed/Lakh/MultiTrack"
@@ -197,6 +196,7 @@ if __name__ == "__main__":
     epochs = 20
 
     try:
+        history = {}
         if os.path.exists(training_history_path):
             with open(training_history_path, "r") as f:
                 history = json.load(f)
