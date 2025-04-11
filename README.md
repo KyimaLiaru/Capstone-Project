@@ -24,6 +24,8 @@ The folder structure should be designed as follows:
 │   ├── Training
 │   │   ├── model.py
 │   │   └── preprocess_data.py
+│   ├── Resource (A folder where SoundFont .sf2 files shoule be saved)
+│   │   └── Vintage Dreams Waves v2.sf2
 │   ├── Result
 │   │   ├── Midi (A folder where generated output in .mid files are saved)
 │   │   ├── npy (A folder where generated output in .npy files are saved)
