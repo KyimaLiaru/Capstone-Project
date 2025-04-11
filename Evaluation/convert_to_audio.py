@@ -8,7 +8,7 @@ def midi_to_wav(midi_file, soundfont_file, output_path):
     fs = fluidsynth.Synth(samplerate=44100)
 
     # Start FluidSynth in file-rendering mode
-    fs.start(driver="file", filename=output_path)
+    fs.start(driver="file")
 
     # Load the SoundFont
     sfid = fs.sfload(soundfont_file)
@@ -23,6 +23,7 @@ def midi_to_wav(midi_file, soundfont_file, output_path):
 
     # Clean up
     fs.delete()
+    os.rename('fluidsynth.wav', output_path)
     print(f"WAV file rendered to: {output_path}")
 
 def convert_folder(mid_folder, soundfont_file, wav_output_folder):
