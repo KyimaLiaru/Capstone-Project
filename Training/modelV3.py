@@ -150,6 +150,32 @@ def plot_average_history(csv_path, save_path):
     plt.close()
 
 
+def print_final_metrics(csv_path):
+    df = pd.read_csv(csv_path)
+    final_row = df.iloc[-1]  # Last epoch
+
+    metric_names = ["auc", "precision", "recall", "loss"]
+    avg_results = {}
+
+    for metric in metric_names:
+        train_cols = [f"reshape_{metric}"] + [f"reshape_{i}_{metric}" for i in range(1, 4)]
+        val_cols = [f"val_{col}" for col in train_cols]
+
+        # Get values from final_row, skipping any missing columns
+        train_vals = [final_row[c] for c in train_cols if c in final_row]
+        val_vals = [final_row[c] for c in val_cols if c in final_row]
+
+        avg_results[metric] = {
+            "train": sum(train_vals) / len(train_vals) if train_vals else None,
+            "val": sum(val_vals) / len(val_vals) if val_vals else None
+        }
+
+    print("=== Final Average Metrics Across All Tracks ===")
+    for metric in metric_names:
+        train = avg_results[metric]["train"]
+        val = avg_results[metric]["val"]
+        print(f"{metric.capitalize():<10} Train: {train:.4f}   Valid: {val:.4f}")
+
 if __name__ == "__main__":
 
     # Paths
@@ -157,7 +183,7 @@ if __name__ == "__main__":
     musegan_checkpoint_path = "../../trained_model/musegan_checkpoints"
     musegan_checkpoint_name = os.path.join(musegan_checkpoint_path, "musegan_epoch_{epoch:02d}.h5")
     musegan_log_path = "../../trained_model/musegan_training_log.csv"
-    trained_musegan_path = "../../trained_model/musegan.h5"
+    trained_musegan_path = "../../trained_model/musegan-new/musegan.h5"
     training_history_path = "../../trained_model/training_history.json"
     history = {"loss": [], "accuracy": [], "val_loss": [], "val_accuracy": []}
 
@@ -235,6 +261,8 @@ if __name__ == "__main__":
 
         plot_training_history(musegan_log_path, result_plot_path)
         plot_average_history(musegan_log_path, average_result_plot_path)
+
+        print_final_metrics(musegan_log_path)
 
     except tf.errors.ResourceExhaustedError:
         print("OOM Error detected. Restarting training from last checkpoint...")
