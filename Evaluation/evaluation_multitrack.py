@@ -130,12 +130,12 @@ def evaluate_folder(folder_path, label='generated output'):
     for filename in npy_files:
         path = os.path.join(folder_path, filename)
         try:
-            piano_roll = np.load(path, allow_pickle="True").item()
+            piano_roll = np.load(path, allow_pickle="True")
             metrics_table, td_df = evaluate_piano_roll(piano_roll)
             metric_tables.append(metrics_table)
             td_matrices.append(td_df)
         except Exception as e:
-            print(f"Failed to process {filename}: {e}")
+            print(f"Failed to process {filename}: {type(e).__name__}: {e}")
 
     # Average the metric tables
     combined_metrics = pd.concat(metric_tables).groupby(level=0).mean()
