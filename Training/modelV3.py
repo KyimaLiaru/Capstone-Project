@@ -240,11 +240,12 @@ if __name__ == "__main__":
             musegan = build_musegan()
             print("MuseGAN model not found, building new MuseGAN model...")
 
+        print("MuseGAN model summary:")
+        musegan.summary()
+
         # Perform model training if trained model does not exist or only checkpoints exist
         if not trained_model:
-            print("MuseGAN model summary:")
-            musegan.summary()
-
+            
             # Algorithm to save model checkpoints
             callbacks = [
                 ModelCheckpoint(filepath=musegan_checkpoint_name, save_best_only=False, save_weights_only=False, verbose=1),
