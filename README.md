@@ -17,21 +17,21 @@ The folder structure should be designed as follows:
 │           └── lmd_matched.tar.gz
 ├── Model
 │   ├── Capstone-Project(GitHub)
-│   ├── Evaluation
-│   │   ├── convert_to_audio.py
-│   │   ├── evaluation.py
-│   │   └── generate_output.py
-│   ├── Training
-│   │   ├── model.py
-│   │   └── preprocess_data.py
-│   ├── Resource (A folder where SoundFont .sf2 files shoule be saved)
-│   │   └── Vintage Dreams Waves v2.sf2
-│   ├── Result
-│   │   ├── Midi (A folder where generated output in .mid files are saved)
-│   │   ├── npy (A folder where generated output in .npy files are saved)
-│   │   ├── Performance (A folder where visualized metric plots are saved)
-│   │   ├── Rolls (A folder where visualged images of generated outputs are saved)
-│   │   └── wav (A folder where audio converted from generated outputs files are saved)
+│   │   ├── Evaluation
+│   │   │   ├── convert_to_audio.py
+│   │   │   ├── evaluation.py
+│   │   │   └── generate_output.py
+│   │   ├── Training
+│   │   │   ├── model.py
+│   │   │   └── preprocess_data.py
+│   │   ├── Resource (A folder where SoundFont .sf2 files shoule be saved)
+│   │   │   └── Vintage Dreams Waves v2.sf2
+│   │   └── Result
+│   │       ├── Midi (A folder where generated output in .mid files are saved)
+│   │       ├── npy (A folder where generated output in .npy files are saved)
+│   │       ├── Performance (A folder where visualized metric plots are saved)
+│   │       ├── Rolls (A folder where visualged images of generated outputs are saved)
+│   │       └── wav (A folder where audio converted from generated outputs files are saved)
 │   └── trained_model
 │       └── musegan-new (A folder where model informations are saved)
 │           ├── musegan.h5
