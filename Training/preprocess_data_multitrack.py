@@ -41,12 +41,8 @@ def process_lakh_data(file):
     try:
         pm = pretty_midi.PrettyMIDI(file)
         pad = extract_instrument_roll(pm, range(0, 8))
-        print(f"Pad Sum: {pad.sum()}")
         bass = extract_instrument_roll(pm, range(32, 40))
-        print(f"Bass Sum: {bass.sum()}")
         drum = extract_instrument_roll(pm, [], drum=True)
-        print(f"Drum Sum: {drum.sum()}")
-
 
         # Randomly select a melodic instrument
         melodic_programs = [range(40, 48), range(48, 56), range(56, 64), range(64, 72), range(72, 80), range(80, 88), range(88, 96)]
@@ -55,7 +51,6 @@ def process_lakh_data(file):
         for prog in melodic_programs:
             lead = extract_instrument_roll(pm, prog)
             if lead.sum() > 0:
-                print(f"Lead Sum: {lead.sum()}")
                 break
             lead = np.zeros((512, 128), dtype=float)
 
@@ -89,7 +84,7 @@ with tarfile.open(lakh_dataset_path, "r:gz") as tar:
             prefix = "".join(prefix_parts[1:4])  # three directory levels, typically alphabet letters
             basename = os.path.basename(member.name).replace(".mid", ".npy")
             output_file = os.path.join(lakh_preprocess_output_path, f"{prefix}_{basename}")
-            print(f"Processing {output_file}")
+
             if os.path.exists(output_file):
                 continue
 
@@ -97,6 +92,11 @@ with tarfile.open(lakh_dataset_path, "r:gz") as tar:
             file = tar.extractfile(member)
             if file is not None:
                 result = process_lakh_data(file)
+                print(f"Processing {output_file}")
+                print(f"Pad Sum: {np.sum(result['pad'])}")
+                print(f"Bass Sum: {np.sum(result['bass'])}")
+                print(f"Drum Sum: {np.sum(result['drum'])}")
+                print(f"Lead Sum: {np.sum(result['lead'])}")
                 # if np.sum(result["drum"]) == 0:
                 #     print("No drum data in", file)
 
@@ -108,8 +108,7 @@ with tarfile.open(lakh_dataset_path, "r:gz") as tar:
                     count += 1
 
             if count % 100 == 1:
-                asdf = "asdf"
-                # print(f"Processed {count} files")
+                print(f"Processed {count} files")
 
 raise RuntimeError
 
