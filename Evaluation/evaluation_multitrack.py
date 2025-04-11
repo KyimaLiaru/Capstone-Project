@@ -50,24 +50,28 @@ def qualified_notes(piano_roll, min_duration=3):
         qualified = 0
         total = 0
         for pitch in range(PITCH_CLASSES):
-            onsets = np.where(track[pitch] == 1)[0]
-            if len(onsets) == 0:
-                continue
+            active = False
             duration = 0
-            prev = -2
-            for t in onsets:
-                if t == prev + 1:
+            for t in range(track.shape[1]):
+                if track[pitch, t] > 0:
                     duration += 1
+                    active = True
                 else:
-                    if min_duration <= duration <= STEPS_PER_BAR:
-                        qualified += 1
-                    duration = 1
-                prev = t
-            if min_duration <= duration <= STEPS_PER_BAR:
-                qualified += 1
-            total += len(onsets)
+                    if active:
+                        if min_duration <= duration <= STEPS_PER_BAR:
+                            qualified += 1
+                        total += duration
+                        duration = 0
+                        active = False
+
+            # Check end of time axis
+            if active:
+                if min_duration <= duration <= STEPS_PER_BAR:
+                    qualified += 1
+                total += duration
+
         qn_scores.append(qualified / total if total > 0 else 0)
-    return qn_scores
+        return qn_scores
 
 
 # Metric 4: Drum Pattern Consistency
