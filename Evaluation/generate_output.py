@@ -179,11 +179,10 @@ for i in range(1, 21):
     # musegan_save_path = f"../../trained_model/musegan_checkpoints/musegan_epoch_{i:02d}.h5"
     np.random.seed(i)
     drum, bass, pad, lead = generate_piano_roll(musegan)
-    # drum2, bass2, pad2, lead2 = generate_piano_roll(musegan2)
-    # drum3, bass3, pad3, lead3 = generate_piano_roll(musegan3)
-    print(drum.T.shape)
+    drum2, bass2, pad2, lead2 = generate_piano_roll(musegan2)
+    drum3, bass3, pad3, lead3 = generate_piano_roll(musegan3)
 
-    break
-    # visualize_piano_roll(drum, bass3, pad, lead2, figure_path, i)
-    # save_tracks_to_midi(drum, bass3, pad, lead2, midi_path, i)
-    # save_tracks_to_npy(drum, bass3, pad, lead2, npy_path, i)
+    # break
+    visualize_piano_roll(drum, bass3, pad, lead2, figure_path, i)
+    save_tracks_to_midi(drum, bass3, pad, lead2, midi_path, i)
+    save_tracks_to_npy(drum, bass3, pad, lead2, npy_path, i)

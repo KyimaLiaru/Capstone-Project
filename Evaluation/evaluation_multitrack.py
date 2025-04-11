@@ -106,13 +106,21 @@ def tonal_distance(piano_roll):
 
 
 # Master function to evaluate one piano roll
-def evaluate_piano_roll(piano_roll):
-    piano_roll = np.stack([
-        piano_roll["drum"],
-        piano_roll["bass"],
-        piano_roll["pad"],
-        piano_roll["lead"]
-    ])
+def evaluate_piano_roll(piano_roll, label):
+    if label == 'Generated Output':
+        piano_roll = np.stack([
+            piano_roll["drum"],
+            piano_roll["bass"],
+            piano_roll["pad"],
+            piano_roll["lead"]
+        ])
+    elif label == 'Training Data':
+        piano_roll = np.stack([
+            piano_roll["drum"].T,
+            piano_roll["bass"].T,
+            piano_roll["pad"].T,
+            piano_roll["lead"].T
+        ])
 
     eb = empty_bar_rate(piano_roll)
     upc = used_pitch_classes(piano_roll)
@@ -162,5 +170,5 @@ def evaluate_folder(folder_path, label='generated output'):
 train_folder_path = "../../../dataset/Preprocessed/Lakh/MultiTrack"
 gen_folder_path = "../Result/npy"
 
-# evaluate_folder(train_folder_path, label="Training Data")
+evaluate_folder(train_folder_path, label="Training Data")
 evaluate_folder(gen_folder_path, label="Generated Output")
