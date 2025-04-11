@@ -1,41 +1,27 @@
 import os.path
 import time
-import fluidsynth
+from midi2audio import FluidSynth
 
-
-def midi_to_wav(midi_file, soundfont_file, output_path):
-    # Create a FluidSynth object with WAV file output only
-    fs = fluidsynth.Synth(samplerate=44100)
-
-    # Start FluidSynth in file-rendering mode
-    fs.start(driver="file")
-
-    # Load the SoundFont
-    sfid = fs.sfload(soundfont_file)
-
-    # Load and play the MIDI file (it renders into the .wav file)
-    fs.midi_file_play(midi_file)
-
-    # Clean up
-    fs.delete()
-    os.rename('fluidsynth.wav', output_path)
-    print(f"WAV file rendered to: {output_path}")
-
-def convert_folder(mid_folder, soundfont_file, wav_output_folder):
+def convert_folder(midi_folder, soundfont_file, wav_output_folder):
     if not os.path.exists(wav_output_folder):
         os.makedirs(wav_output_folder)
 
-    midi_files = [f for f in os.listdir(mid_folder) if f.lower().endswith('.mid')]
+    fs = FluidSynth(sound_font=soundfont_file)
+
+    midi_files = [f for f in os.listdir(midi_folder) if f.lower().endswith('.mid')]
 
     for midi_file in midi_files:
-        midi_path = os.path.join(mid_folder, midi_file)
+        midi_path = os.path.join(midi_folder, midi_file)
         wav_filename = os.path.splitext(midi_file)[0] + ".wav"
-        wav_output_path = os.path.join(wav_output_folder, wav_filename)
-        midi_to_wav(midi_path, soundfont_file, wav_output_path)
+        wav_output_name = os.path.join(wav_output_folder, wav_filename)
+
+        fs.midi_to_audio(midi_path, wav_output_name)
+        print(f"WAV file rendered to: {wav_output_name}")
+
 
 # Define paths
 midi_path = "../Result/MIDI"
-output_wav_path = "../Result/wav"
+wav_output_path = "../Result/wav"
 soundfont_path = "../Resource/Vintage Dreams Waves v2.sf2"
 
-convert_folder(midi_path, soundfont_path, output_wav_path)
+convert_folder(midi_path, soundfont_path, wav_output_path)
