@@ -163,5 +163,5 @@ def evaluate_folder(folder_path, label='generated output'):
 train_folder_path = "../../../dataset/Preprocessed/Lakh/MultiTrack"
 gen_folder_path = "../Result/npy"
 
-evaluate_folder(train_folder_path, label="Training Data")
+# evaluate_folder(train_folder_path, label="Training Data")
 evaluate_folder(gen_folder_path, label="Generated Output")

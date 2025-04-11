@@ -166,4 +166,4 @@ for i in range(1, 21):
     drum3, bass3, pad3, lead3 = generate_piano_roll(musegan3)
     visualize_piano_roll(drum, bass3, pad, lead2, figure_path, i)
     save_tracks_to_midi(drum, bass3, pad, lead2, midi_path, i)
-    save_tracks_to_npy(drum, bass3, pad, lead2, midi_path, i)
+    save_tracks_to_npy(drum, bass3, pad, lead2, npy_path, i)
