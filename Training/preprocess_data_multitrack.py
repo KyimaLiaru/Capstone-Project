@@ -92,10 +92,10 @@ with tarfile.open(lakh_dataset_path, "r:gz") as tar:
             if file is not None:
                 result = process_lakh_data(file)
                 print(f"Processing {output_file}")
-                print(f"Pad Sum: {np.sum(result["pad"])}")
-                print(f"Bass Sum: {np.sum(result["bass"])}")
-                print(f"Drum Sum: {np.sum(result["drum"])}")
-                print(f"Lead Sum: {np.sum(result["lead"])}")
+                print(f'Pad Sum: {np.sum(result["pad"])}')
+                print(f'Bass Sum: {np.sum(result["bass"])}')
+                print(f'Drum Sum: {np.sum(result["drum"])}')
+                print(f'Lead Sum: {np.sum(result["lead"])}')
                 # if np.sum(result["drum"]) == 0:
                 #     print("No drum data in", file)
 
