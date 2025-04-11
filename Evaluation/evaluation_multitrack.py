@@ -154,10 +154,10 @@ def tonal_distance(piano_roll):
 # Master function to evaluate one piano roll
 def evaluate_piano_roll(piano_roll):
     piano_roll = np.stack([
-        piano_roll["drum"].T,
-        piano_roll["bass"].T,
-        piano_roll["pad"].T,
-        piano_roll["lead"].T
+        piano_roll["drum"],
+        piano_roll["bass"],
+        piano_roll["pad"],
+        piano_roll["lead"]
     ])
 
     eb = empty_bar_rate(piano_roll)
