@@ -40,80 +40,34 @@ def used_pitch_classes(piano_roll):
 
 
 # Metric 3: Qualified Notes
-# def qualified_notes(piano_roll, min_duration=3):
-#     qn_scores = []
-#     for i in range(NUM_TRACKS):
-#         if i == 0: # Skip drum
-#             qn_scores.append(None)
-#             continue
-#         track = piano_roll[i]
-#         qualified = 0
-#         total = 0
-#         for pitch in range(PITCH_CLASSES):
-#             onsets = np.where(track[pitch] == 1)[0]
-#             if len(onsets) == 0:
-#                 continue
-#             duration = 0
-#             prev = -2
-#             for t in onsets:
-#                 if t == prev + 1:
-#                     duration += 1
-#                 else:
-#                     if min_duration <= duration <= STEPS_PER_BAR:
-#                         qualified += 1
-#                     duration = 1
-#                 prev = t
-#             if min_duration <= duration <= STEPS_PER_BAR:
-#                 qualified += 1
-#             total += len(onsets)
-#         qn_scores.append(qualified / total if total > 0 else 0)
-#     return qn_scores
-
-def qualified_notes(piano_roll, min_duration=3, max_duration=32, gap_tolerance=1):
+def qualified_notes(piano_roll, min_duration=3):
     qn_scores = []
-    for i in range(len(piano_roll)):
-        if i == 0:  # skip drums
+    for i in range(NUM_TRACKS):
+        if i == 0: # Skip drum
             qn_scores.append(None)
             continue
-
         track = piano_roll[i]
         qualified = 0
         total = 0
-        note_count = 0
-
-        for pitch in range(track.shape[0]):
+        for pitch in range(PITCH_CLASSES):
+            onsets = np.where(track[pitch] == 1)[0]
+            if len(onsets) == 0:
+                continue
             duration = 0
-            gap = 0
-            active = False
-
-            for t in range(track.shape[1]):
-                if track[pitch, t] > 0:
-                    if gap > 0:
-                        duration += gap  # stitch small gaps
-                        gap = 0
+            prev = -2
+            for t in onsets:
+                if t == prev + 1:
                     duration += 1
-                    active = True
-                elif active:
-                    if gap < gap_tolerance:
-                        gap += 1  # tolerate short gap
-                    else:
-                        # long enough to be a note?
-                        if min_duration <= duration <= max_duration:
-                            qualified += 1
-                        total += duration
-                        note_count += 1
-                        duration = 0
-                        gap = 0
-                        active = False
-
-            # handle tail end
-            if active and min_duration <= duration <= max_duration:
+                else:
+                    if min_duration <= duration <= STEPS_PER_BAR:
+                        qualified += 1
+                    duration = 1
+                prev = t
+            if min_duration <= duration <= STEPS_PER_BAR:
                 qualified += 1
-                total += duration
-                note_count += 1
-
+            total += len(onsets)
         qn_scores.append(qualified / total if total > 0 else 0)
-    return qn_scores
+#     return qn_scores
 
 # Metric 4: Drum Pattern Consistency
 def drum_pattern(piano_roll):
