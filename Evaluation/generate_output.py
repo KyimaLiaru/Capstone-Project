@@ -183,6 +183,7 @@ for i in range(1, 21):
     drum3, bass3, pad3, lead3 = generate_piano_roll(musegan3)
     # print_note_durations_from_track(drum, "drum")
     # print_note_durations_from_track(bass3, "bass")
+    print(pad)
     print_note_durations_from_track(pad, "pad")
     # print_note_durations_from_track(lead2, "lead")
     break
