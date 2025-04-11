@@ -108,6 +108,13 @@ def tonal_distance(piano_roll):
 
 # Master function to evaluate one piano roll
 def evaluate_piano_roll(piano_roll):
+    piano_roll = np.stack([
+        piano_roll["drum"].T,
+        piano_roll["bass"].T,
+        piano_roll["pad"].T,
+        piano_roll["lead"].T
+    ])
+
     eb = empty_bar_rate(piano_roll)
     upc = used_pitch_classes(piano_roll)
     qn = qualified_notes(piano_roll)
@@ -130,12 +137,7 @@ def evaluate_folder(folder_path, label='generated output'):
     for filename in npy_files:
         path = os.path.join(folder_path, filename)
         try:
-            piano_roll = np.load(path, allow_pickle="True")
-            print("Type:", type(piano_roll))
-            print("Shape:", getattr(piano_roll, "shape", None))
-            if piano_roll.ndim == 0:
-                print("Scalar contents:", piano_roll.item())
-            break
+            piano_roll = np.load(path, allow_pickle="True").item()
             metrics_table, td_df = evaluate_piano_roll(piano_roll)
             metric_tables.append(metrics_table)
             td_matrices.append(td_df)
