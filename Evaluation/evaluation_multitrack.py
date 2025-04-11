@@ -69,57 +69,50 @@ def used_pitch_classes(piano_roll):
 #         qn_scores.append(qualified / total if total > 0 else 0)
 #     return qn_scores
 
-def qualified_notes(piano_roll, min_duration=3):
+def qualified_notes(piano_roll, min_duration=3, max_duration=32, gap_tolerance=1):
     qn_scores = []
     for i in range(len(piano_roll)):
-        if i == 0:
-            print(f"[Track {i}] Skipping drum track.")
+        if i == 0:  # skip drums
             qn_scores.append(None)
             continue
 
-        print(f"\n[Track {i}] Evaluating Qualified Notes...")
         track = piano_roll[i]
         qualified = 0
         total = 0
         note_count = 0
 
         for pitch in range(track.shape[0]):
-            active = False
             duration = 0
+            gap = 0
+            active = False
+
             for t in range(track.shape[1]):
                 if track[pitch, t] > 0:
+                    if gap > 0:
+                        duration += gap  # stitch small gaps
+                        gap = 0
                     duration += 1
                     active = True
-                else:
-                    if active:
-                        if min_duration <= duration <= STEPS_PER_BAR:
+                elif active:
+                    if gap < gap_tolerance:
+                        gap += 1  # tolerate short gap
+                    else:
+                        # long enough to be a note?
+                        if min_duration <= duration <= max_duration:
                             qualified += 1
-                            print(f"  Pitch {pitch}: Qualified note with duration {duration}")
-                        # else:
-                            # print(f"  Pitch {pitch}: Unqualified note with duration {duration}")
                         total += duration
                         note_count += 1
                         duration = 0
+                        gap = 0
                         active = False
 
-            if active:
-                if min_duration <= duration <= STEPS_PER_BAR:
-                    qualified += 1
-                    print(f"  Pitch {pitch}: Qualified note (end) with duration {duration}")
-                # else:
-                    # print(f"  Pitch {pitch}: Unqualified note (end) with duration {duration}")
+            # handle tail end
+            if active and min_duration <= duration <= max_duration:
+                qualified += 1
                 total += duration
                 note_count += 1
 
-        if total == 0:
-            print("  No notes detected.")
-            qn_scores.append(0)
-        else:
-            ratio = qualified / total
-            print(f"  Total notes: {note_count}, Total active frames: {total}, Qualified: {qualified}")
-            print(f"  → Qualified Note Score: {ratio:.4f}")
-            qn_scores.append(ratio)
-
+        qn_scores.append(qualified / total if total > 0 else 0)
     return qn_scores
 
 # Metric 4: Drum Pattern Consistency
