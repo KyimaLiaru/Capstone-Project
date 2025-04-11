@@ -146,43 +146,26 @@ def print_note_durations_from_track(track, track_name="Track", threshold=0.5):
             print(f"Pitch {pitch} duration: {duration}")
 
 
-# Load MuseGAN model
-musegan_save_path = "../../trained_model/musegan-old/musegan_checkpoints/musegan_epoch_11.h5"
-musegan_save_path_2 = "../../trained_model/musegan-old/musegan_checkpoints/musegan_epoch_16.h5"
-# musegan_save_path_3 = "../../trained_model/musegan.h5"
+# Define Paths
+musegan_save_path = "../../trained_model/musegan-nes/musegan.h5"
 musegan_old_path = "../../trained_model/musegan-old/musegan.h5"
 figure_path = "../Result/Rolls"
 midi_path = "../Result/MIDI"
 npy_path = "../Result/npy"
 
-# musegan = tf.keras.models.load_model(musegan_save_path)
-# musegan2 = tf.keras.models.load_model(musegan_save_path_2)
-# musegan3 = tf.keras.models.load_model(musegan_save_path_3)
+# Load MuseGAN model
+musegan = tf.keras.models.load_model(musegan_save_path)
+musegan_old = tf.keras.models.load_model(musegan_old_path)
+
 print("Model successfully loaded.")
-# for i in range(1, 5):
-#     drum, bass, pad, lead = generate_piano_roll(musegan)
-#     visualize_piano_roll(drum, bass, pad, lead, figure_path, i)
-#     save_tracks_to_midi(drum, bass, pad, lead, midi_path, i)
-# for i in range(5, 9):
-#     drum, bass, pad, lead = generate_piano_roll(musegan2)
-#     visualize_piano_roll(drum, bass, pad, lead, figure_path, i)
-#     save_tracks_to_midi(drum, bass, pad, lead, midi_path, i)
-# for i in range(9, 13):
-#     drum, bass, pad, lead = generate_piano_roll(musegan3)
-#     visualize_piano_roll(drum, bass, pad, lead, figure_path, i)
-#     save_tracks_to_midi(drum, bass, pad, lead, midi_path, i)
 
-musegan = tf.keras.models.load_model(musegan_old_path)
-musegan2 = tf.keras.models.load_model(musegan_save_path)
-musegan3 = tf.keras.models.load_model(musegan_save_path_2)
+
 for i in range(1, 21):
-    # musegan_save_path = f"../../trained_model/musegan_checkpoints/musegan_epoch_{i:02d}.h5"
     np.random.seed(i)
+    # Generate Output
     drum, bass, pad, lead = generate_piano_roll(musegan)
-    drum2, bass2, pad2, lead2 = generate_piano_roll(musegan2)
-    drum3, bass3, pad3, lead3 = generate_piano_roll(musegan3)
 
-    # break
-    visualize_piano_roll(drum, bass3, pad, lead2, figure_path, i)
-    save_tracks_to_midi(drum, bass3, pad, lead2, midi_path, i)
-    save_tracks_to_npy(drum, bass3, pad, lead2, npy_path, i)
+    # Save visualized image, .mid file, and .npy file of the generated output.
+    visualize_piano_roll(drum, bass, pad, lead, figure_path, i)
+    save_tracks_to_midi(drum, bass, pad, lead, midi_path, i)
+    save_tracks_to_npy(drum, bass, pad, lead, npy_path, i)

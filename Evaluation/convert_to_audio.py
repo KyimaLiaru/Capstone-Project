@@ -15,6 +15,7 @@ def convert_folder(midi_folder, soundfont_file, wav_output_folder):
         wav_filename = os.path.splitext(midi_file)[0] + ".wav"
         wav_output_name = os.path.join(wav_output_folder, wav_filename)
 
+        # Convert .mid file to .wav
         fs.midi_to_audio(midi_path, wav_output_name)
         print(f"WAV file rendered to: {wav_output_name}")
 

@@ -1,10 +1,7 @@
 import os
-import io
 import re
 import json
-import time
 import sys
-import tarfile
 import numpy as np
 import tensorflow as tf
 from tensorflow.keras.layers import Input, Conv1D, LSTM, Dense, Flatten, Reshape, Dropout, Concatenate
@@ -36,8 +33,7 @@ def build_musegan(input_shape=(512, 128), num_tracks=4):
         x = Reshape(input_shape)(x)
         processed.append(x)
 
-    # Merge the tracks into a single piano roll
-    # output = Concatenate(axis=-1)(processed)
+    # Apply different loss weights to each track
     model = Model(inputs=inputs, outputs=processed)
     model.compile(optimizer="adam", loss=["binary_crossentropy"]*4,
                   loss_weights=[1.0, 1.2, 0.5, 1.5],
@@ -45,7 +41,7 @@ def build_musegan(input_shape=(512, 128), num_tracks=4):
     )
     return model
 
-# Function to load all preprocessed Lakh MIDI data in batch
+# Generator to load all preprocessed Lakh MIDI data in batch
 def load_data_from_directory(data_dir, file_list, batch_size):
     while True:
         for i in range(0, len(file_list), batch_size):
@@ -149,7 +145,7 @@ def plot_average_history(csv_path, save_path):
     plt.show()
     plt.close()
 
-
+# Function to print out final metric scores
 def print_final_metrics(csv_path):
     df = pd.read_csv(csv_path)
     final_row = df.iloc[-1]  # Last epoch
@@ -161,7 +157,7 @@ def print_final_metrics(csv_path):
         train_cols = [f"reshape_{metric}"] + [f"reshape_{i}_{metric}" for i in range(1, 4)]
         val_cols = [f"val_{col}" for col in train_cols]
 
-        # Get values from final_row, skipping any missing columns
+        # Get values from final epoch
         train_vals = [final_row[c] for c in train_cols if c in final_row]
         val_vals = [final_row[c] for c in val_cols if c in final_row]
 
@@ -176,9 +172,10 @@ def print_final_metrics(csv_path):
         val = avg_results[metric]["val"]
         print(f"{metric.capitalize():<10} Train: {train:.4f}   Valid: {val:.4f}")
 
+# Main code for model training
 if __name__ == "__main__":
 
-    # Paths
+    # Define Paths
     musegan_save_path = "../../trained_model/musegan-new/musegan.h5"
     musegan_checkpoint_path = "../../trained_model/musegan-new/musegan_checkpoints"
     musegan_checkpoint_name = os.path.join(musegan_checkpoint_path, "musegan_epoch_{epoch:02d}.h5")
@@ -186,7 +183,7 @@ if __name__ == "__main__":
     trained_musegan_path = "../../trained_model/musegan-new/musegan.h5"
     training_history_path = "../../trained_model/musegan-new/training_history.json"
 
-    # lakh_dataset_path = "../../../dataset/Preprocessed/Lakh/MultiTrack-ver3.tar.gz"
+    lakh_dataset_path = "../../../dataset/Raw/Lakh/lmd_matched.tar.gz"
     lakh_data_path = "../../../dataset/Preprocessed/Lakh/MultiTrack"
     result_plot_path = "../Result/Performance/performance.png"
     average_result_plot_path = "../Result/Performance/average_performance.png"
@@ -195,6 +192,7 @@ if __name__ == "__main__":
     batch_size = 32
     epochs = 20
 
+    # try-except for when OOM occurs.
     try:
         history = {}
         if os.path.exists(training_history_path):
@@ -202,9 +200,11 @@ if __name__ == "__main__":
                 history = json.load(f)
             print("loaded previous training history.")
 
+        # Load preprocessed data lists
         file_list = [f for f in os.listdir(lakh_data_path) if f.endswith(".npy")]
         file_list.sort()
 
+        # Define necessary variables
         split_index = int(len(file_list) * 0.8)
         train_files = file_list[:split_index]
         valid_files = file_list[split_index:]
@@ -212,9 +212,11 @@ if __name__ == "__main__":
         steps_per_epoch = len(train_files) // batch_size
         validation_steps = len(valid_files) // batch_size
 
+        # Load data in batches
         train_batch = load_data_from_directory(lakh_data_path, train_files, batch_size)
         valid_batch = load_data_from_directory(lakh_data_path, valid_files, batch_size)
 
+        # Load last checkpoint if any exists
         latest_epoch = 0
         latest_checkpoint = None
 
@@ -224,6 +226,7 @@ if __name__ == "__main__":
             latest_epoch = max(checkpoint_epochs)
             latest_checkpoint = os.path.join(musegan_checkpoint_path, f"musegan_epoch_{latest_epoch:02d}.h5")
 
+        # Load trained model if exists
         trained_model = False
 
         if os.path.exists(trained_musegan_path):
@@ -237,15 +240,18 @@ if __name__ == "__main__":
             musegan = build_musegan()
             print("MuseGAN model not found, building new MuseGAN model...")
 
+        # Perform model training if trained model does not exist or only checkpoints exist
         if not trained_model:
             print("MuseGAN model summary:")
             musegan.summary()
 
+            # Algorithm to save model checkpoints
             callbacks = [
                 ModelCheckpoint(filepath=musegan_checkpoint_name, save_best_only=False, save_weights_only=False, verbose=1),
                 CSVLogger(musegan_log_path, append=True)
             ]
 
+            # Train the model
             print("MuseGAN train start...")
             lakh_history = musegan.fit(
                 train_batch,
@@ -259,11 +265,14 @@ if __name__ == "__main__":
             )
             musegan.save(musegan_save_path)
 
+        # Plot and save training history
         plot_training_history(musegan_log_path, result_plot_path)
         plot_average_history(musegan_log_path, average_result_plot_path)
 
+        # Print final metric scores
         print_final_metrics(musegan_log_path)
 
+    # Re-execute the program if OOM error occurs
     except tf.errors.ResourceExhaustedError:
         print("OOM Error detected. Restarting training from last checkpoint...")
         os.execv(sys.executable, [sys.executable] + sys.argv)

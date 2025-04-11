@@ -11,6 +11,7 @@ import json
 # Preprocess and Save Lakh Midi Dataset #
 #########################################
 
+# Extract piano roll of given instrument.
 def extract_instrument_roll(pm, program_range, drum=False):
     roll = np.zeros((512, 128), dtype=float)
     for inst in pm.instruments:
@@ -25,6 +26,7 @@ def extract_instrument_roll(pm, program_range, drum=False):
             roll = np.maximum(roll, inst_roll)
     return roll
 
+# Extract drum from the instrument
 def extract_drum_roll(inst, fs=16, length=512):
     roll = np.zeros((length, 128), dtype=float)
     for note in inst.notes:
@@ -37,6 +39,7 @@ def extract_drum_roll(inst, fs=16, length=512):
         roll[start:end, note.pitch] = 1.0
     return roll
 
+# Main function to preprocess lakh data
 def process_lakh_data(file):
     try:
         pm = pretty_midi.PrettyMIDI(file)
@@ -101,99 +104,11 @@ with tarfile.open(lakh_dataset_path, "r:gz") as tar:
                     print(f'Drum Sum: {np.sum(result["drum"])}, {result["drum"].shape}')
                     print(f'Lead Sum: {np.sum(result["lead"])}, {result["lead"].shape}')
                     # Save the preprocessed data
-                    # np.save(output_file, result)
-                    # np.savez(output_file, drum=result["drum"], bass=result["bass"], pad=result["pad"], lead=result["lead"])
-                    # print(f"Saved {output_file}")
+                    np.save(output_file, result)
+                    print(f"Saved {output_file}")
                     count += 1
 
             if count % 100 == 1:
                 asdf = "asdf"
-                # print(f"Processed {count} files")
-
-raise RuntimeError
-
-######################################
-# Preprocess and Save NSynth Dataset #
-######################################
-
-# Load and parse the nsynth.tfrecord dataset file
-def parse_tfrecord(record):
-    feature_description = {
-        'audio': tf.io.FixedLenFeature([64000], tf.float32),
-        'instrument_family': tf.io.FixedLenFeature([], tf.int64),
-        'instrument_family_str': tf.io.FixedLenFeature([], tf.string),
-        'pitch': tf.io.FixedLenFeature([], tf.int64),
-        'velocity': tf.io.FixedLenFeature([], tf.int64),
-    }
-    return tf.io.parse_single_example(record, feature_description)
-
-
-def process_nsynth_data(file_path, output_base_path, dataset_type, sample_rate=16000):
-    raw_dataset = tf.data.TFRecordDataset(file_path)
-    parsed = raw_dataset.map(parse_tfrecord)
-
-    counters = {key: 0 for key in TARGET_FAMILIES}
-    for record in parsed:
-        instrument_family_str = record['instrument_family_str'].numpy().decode('utf-8')
-        instrument_source = record['instrument_source'].numpy()
-        if instrument_family_str not in TARGET_FAMILIES:
-            continue
-        elif instrument_family_str == "bass" and instrument_source == 1:
-            continue
-
-        # # Determine instrument type based on family and source
-        # instrument_family = record['instrument_family'].numpy()
-        # if instrument_family == 0:
-        #     instrument_type = "bass"
-        # elif instrument_family == 4:
-        #     instrument_type = "keyboard"
-        # elif instrument_family == 9:
-        #     instrument_type = "synth_lead"
-        # else:
-        #     continue  # Skip if not one of the desired types
-
-        # Prepare save directory
-        nsynth_preprocess_output_path = os.path.join(output_base_path, instrument_family_str)
-        if not os.path.exists(nsynth_preprocess_output_path):
-            os.makedirs(nsynth_preprocess_output_path)
-        output_file = os.path.join(nsynth_preprocess_output_path,
-                                   f"{dataset_type}_{counters[instrument_family_str]:08d}.npy")
-
-        # Process audio
-        audio = record['audio'].numpy()
-        audio = librosa.resample(audio, orig_sr=64000, target_sr=sample_rate)
-        audio = audio / np.max(np.abs(audio))
-
-        # Save preprocessed data
-        np.save(output_file, {
-            'audio': audio,
-            'instrument_family_str': instrument_family_str,
-            'pitch': record['pitch'].numpy(),
-            'velocity': record['velocity'].numpy(),
-        })
-
-        print(f"Saved {output_file}")
-        counters[instrument_family_str] += 1
-
-    for key, value in counters.items():
-        print(f"Saved {value} samples as instrument {key}.")
-
-
-
-# Target instrument families
-TARGET_FAMILIES = {
-    "bass": "bass",
-    "keyboard": "keyboard",
-    "synth_lead": "synth_lead"
-}
-
-nsynth_input_paths = {
-    "train": "../../../../dataset/Raw/NSynth/nsynth-train.tfrecord",
-    "valid": "../../../../dataset/Raw/NSynth/nsynth-valid.tfrecord",
-    "test": "../../../../dataset/Raw/NSynth/nsynth-test.tfrecord"
-}
-
-nsynth_output_path = "../../../../dataset/Preprocessed/NSynth/16000"
-
-for dtype, path in nsynth_input_paths.items():
-    process_nsynth_data(path, nsynth_output_path, dtype, 16000)
+                print(f"Processed {count} files")
+print("Preprocess Completed.")
