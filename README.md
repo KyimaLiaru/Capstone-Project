@@ -8,7 +8,7 @@ https://colinraffel.com/projects/lmd/
 Being inspired by existing MuseGAN and WaveNet models, this project will be designing simplified versions of the model for suitable training time.
 
 The folder structure should be designed as follows:
-<pre>```Capstone-Project
+<pre>Capstone-Project
 ├── dataset
 │   ├── Preprocessed
 │   │   └── Lakh (A folder where preprocessed files are saved)
@@ -39,4 +39,4 @@ The folder structure should be designed as follows:
 │                ├── musegan_epoch_02.h5
 │                ├── . . .
 │                └── musegan_epoch_20.h5
-```</pre>
+</pre>
