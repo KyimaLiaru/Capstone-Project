@@ -62,7 +62,7 @@ def process_lakh_data(file):
             "lead": lead
         }
     except Exception as e:
-        print(f"Error processing file: {e}")
+        # print(f"Error processing file: {e}")
         return None
 
 # Define the base path for the Lakh MIDI Dataset
@@ -107,7 +107,8 @@ with tarfile.open(lakh_dataset_path, "r:gz") as tar:
                     count += 1
 
             if count % 100 == 1:
-                print(f"Processed {count} files")
+                asdf = "asdf"
+                # print(f"Processed {count} files")
 
 raise RuntimeError
 
