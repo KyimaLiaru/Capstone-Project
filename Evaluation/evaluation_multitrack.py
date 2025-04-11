@@ -134,7 +134,7 @@ def evaluate_piano_roll(piano_roll, label):
     return metrics_table, td_df
 
 
-def evaluate_folder(folder_path, label='generated output'):
+def evaluate_folder(folder_path, label):
     metric_tables = []
     td_matrices = []
 
@@ -146,7 +146,7 @@ def evaluate_folder(folder_path, label='generated output'):
         path = os.path.join(folder_path, filename)
         try:
             piano_roll = np.load(path, allow_pickle="True").item()
-            metrics_table, td_df = evaluate_piano_roll(piano_roll)
+            metrics_table, td_df = evaluate_piano_roll(piano_roll, label)
             metric_tables.append(metrics_table)
             td_matrices.append(td_df)
             count += 1
