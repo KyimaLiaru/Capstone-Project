@@ -52,6 +52,7 @@ def process_lakh_data(file):
         for prog in melodic_programs:
             lead = extract_instrument_roll(pm, prog)
             if lead.sum() > 0:
+                print(lead.sum())
                 break
             lead = np.zeros((512, 128), dtype=float)
 
@@ -97,7 +98,7 @@ with tarfile.open(lakh_dataset_path, "r:gz") as tar:
 
                 if result is not None:
                     # Save the preprocessed data
-                    np.save(output_file, result)
+                    # np.save(output_file, result)
                     # np.savez(output_file, drum=result["drum"], bass=result["bass"], pad=result["pad"], lead=result["lead"])
                     print(f"Saved {output_file}")
                     count += 1

@@ -236,7 +236,6 @@ if __name__ == "__main__":
         plot_training_history(musegan_log_path, result_plot_path)
         plot_average_history(musegan_log_path, average_result_plot_path)
 
-
     except tf.errors.ResourceExhaustedError:
         print("OOM Error detected. Restarting training from last checkpoint...")
         os.execv(sys.executable, [sys.executable] + sys.argv)
