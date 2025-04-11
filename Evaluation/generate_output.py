@@ -142,8 +142,8 @@ def save_tracks_to_midi(drum, bass, pad, lead, output_path, count=1):
 #     visualize_piano_roll(generated_piano_roll, i, image_path)
 
 # Load MuseGAN model
-musegan_save_path = "../../trained_model/musegan_checkpoints/musegan_epoch_11.h5"
-musegan_save_path_2 = "../../trained_model/musegan_checkpoints/musegan_epoch_16.h5"
+musegan_save_path = "../../trained_model/musegan-old/musegan_checkpoints/musegan_epoch_11.h5"
+musegan_save_path_2 = "../../trained_model/musegan-old/musegan_checkpoints/musegan_epoch_16.h5"
 # musegan_save_path_3 = "../../trained_model/musegan.h5"
 musegan_old_path = "../../trained_model/musegan-old/musegan.h5"
 figure_path = "../Result/Rolls"
