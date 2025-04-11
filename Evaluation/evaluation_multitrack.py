@@ -134,6 +134,7 @@ def evaluate_folder(folder_path, label='generated output'):
     npy_files = [f for f in os.listdir(folder_path) if f.endswith('.npy')]
     print(f"Found {len(npy_files)} files in '{folder_path}'.")
 
+    count = 0
     for filename in npy_files:
         path = os.path.join(folder_path, filename)
         try:
@@ -141,6 +142,9 @@ def evaluate_folder(folder_path, label='generated output'):
             metrics_table, td_df = evaluate_piano_roll(piano_roll)
             metric_tables.append(metrics_table)
             td_matrices.append(td_df)
+            count += 1
+            if count % 1000 == 0:
+                print(f"Calculated {count} files.")
         except Exception as e:
             print(f"Failed to process {filename}: {type(e).__name__}: {e}")
 
