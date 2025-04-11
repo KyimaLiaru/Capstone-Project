@@ -14,12 +14,7 @@ def midi_to_wav(midi_file, soundfont_file, output_path):
     sfid = fs.sfload(soundfont_file)
 
     # Load and play the MIDI file (it renders into the .wav file)
-    player = fs.midi_player_add(midi_file)
-    fs.midi_player_play(player)
-
-    # Wait until the MIDI is completely rendered to WAV
-    while fs.midi_player_get_status(player) == fluidsynth.FLUID_PLAYER_PLAYING:
-        time.sleep(0.1)
+    fs.midi_file_play(midi_file)
 
     # Clean up
     fs.delete()
