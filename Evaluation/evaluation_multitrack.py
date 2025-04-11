@@ -67,7 +67,7 @@ def qualified_notes(piano_roll, min_duration=3):
                 qualified += 1
             total += len(onsets)
         qn_scores.append(qualified / total if total > 0 else 0)
-#     return qn_scores
+    return qn_scores
 
 # Metric 4: Drum Pattern Consistency
 def drum_pattern(piano_roll):
