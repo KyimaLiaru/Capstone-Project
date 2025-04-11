@@ -136,6 +136,7 @@ musegan_save_path_2 = "../../trained_model/musegan-old/musegan_checkpoints/museg
 musegan_old_path = "../../trained_model/musegan-old/musegan.h5"
 figure_path = "../Result/Rolls"
 midi_path = "../Result/MIDI"
+npy_path = "../Result/npy"
 
 # musegan = tf.keras.models.load_model(musegan_save_path)
 # musegan2 = tf.keras.models.load_model(musegan_save_path_2)
