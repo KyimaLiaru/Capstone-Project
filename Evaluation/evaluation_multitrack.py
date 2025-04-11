@@ -131,6 +131,11 @@ def evaluate_folder(folder_path, label='generated output'):
         path = os.path.join(folder_path, filename)
         try:
             piano_roll = np.load(path, allow_pickle="True")
+            print("Type:", type(piano_roll))
+            print("Shape:", getattr(piano_roll, "shape", None))
+            if piano_roll.ndim == 0:
+                print("Scalar contents:", piano_roll.item())
+            break
             metrics_table, td_df = evaluate_piano_roll(piano_roll)
             metric_tables.append(metrics_table)
             td_matrices.append(td_df)
