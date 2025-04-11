@@ -11,9 +11,6 @@ import matplotlib.pyplot as plt
 ###################
 
 def generate_piano_roll(musegan, sequence_length=512, pitch_range=128):
-    """
-    Generate a new piano roll using MuseGAN.
-    """
     # Create random input for MuseGAN
     drum_input = np.random.rand(1, sequence_length, pitch_range)
     bass_input = np.random.rand(1, sequence_length, pitch_range)
@@ -31,30 +28,15 @@ def generate_piano_roll(musegan, sequence_length=512, pitch_range=128):
     lead_output = lead_output[0]
 
     # Binarize the output (convert to binary piano roll)
-    # drum_output = (drum_output > 0.1).astype(np.float32)
-    # bass_output = (bass_output > 0.25).astype(np.float32)
-    # pad_output = (pad_output > 0.5).astype(np.float32)
-    # lead_output = (lead_output > 0.05).astype(np.float32)
     drum_output = (drum_output > 0.5).astype(int)
     bass_output = (bass_output > 0.5).astype(int)
     pad_output = (pad_output > 0.5).astype(int)
     lead_output = (lead_output > 0.5).astype(int)
 
-
-    # piano_roll = (piano_roll > 0.5).astype(int)
     return drum_output, bass_output, pad_output, lead_output
 
 
 def visualize_piano_roll(drum, bass, pad, lead, save_path, count):
-    """
-    Visualizes a piano roll using a heatmap.
-
-    Parameters:
-        piano_roll (numpy.ndarray): The piano roll to visualize (shape: [timesteps, pitches]).
-        save_path (str): Optional path to save the visualization as an image file.
-        count (int): count-th piano roll image
-    """
-
     os.makedirs(save_path, exist_ok=True)
     combined_path = os.path.join(save_path, f"combined_{count:02d}.png")
     grid_path = os.path.join(save_path, f"grid_{count:02d}.png")
@@ -134,38 +116,34 @@ def save_tracks_to_npy(drum, bass, pad, lead, output_path, count=1):
     print(f"Saved generated output to: {output_file}")
 
 
-def print_note_durations(piano_roll, threshold=0.5):
+def print_note_durations_from_track(track, track_name="Track", threshold=0.5):
     """
-    Prints the duration (in time steps) of every note event in a piano roll.
+    Prints the duration (in time steps) of every note event in a single piano roll track.
 
     Args:
-        piano_roll: NumPy array of shape (4, 128, 512) or (4, 512, 128)
+        track: NumPy array of shape (512, 128) or (128, 512)
+        track_name: String label for the track
         threshold: Value above which a note is considered "on"
     """
-    if piano_roll.shape[1] == 512:
-        # Transpose if input is (4, 512, 128)
-        piano_roll = piano_roll.transpose(0, 2, 1)  # → (4, 128, 512)
+    if track.shape[0] == 512 and track.shape[1] == 128:
+        track = track.T  # Transpose to shape (128, 512)
 
-    track_names = ["Drum", "Bass", "Pad", "Lead"]
-
-    for i in range(4):
-        print(f"\n=== {track_names[i]} Track ===")
-        track = piano_roll[i]  # shape (128, 512)
-        for pitch in range(128):
-            active = False
-            start = 0
-            for t in range(512):
-                is_on = track[pitch, t] > threshold
-                if is_on and not active:
-                    active = True
-                    start = t
-                elif not is_on and active:
-                    duration = t - start
-                    print(f"Pitch {pitch} duration: {duration}")
-                    active = False
-            if active:
-                duration = 512 - start
+    print(f"\n=== {track_name} Track ===")
+    for pitch in range(128):
+        active = False
+        start = 0
+        for t in range(track.shape[1]):
+            is_on = track[pitch, t] > threshold
+            if is_on and not active:
+                active = True
+                start = t
+            elif not is_on and active:
+                duration = t - start
                 print(f"Pitch {pitch} duration: {duration}")
+                active = False
+        if active:
+            duration = track.shape[1] - start
+            print(f"Pitch {pitch} duration: {duration}")
 
 
 # Load MuseGAN model
@@ -203,6 +181,10 @@ for i in range(1, 21):
     drum, bass, pad, lead = generate_piano_roll(musegan)
     drum2, bass2, pad2, lead2 = generate_piano_roll(musegan2)
     drum3, bass3, pad3, lead3 = generate_piano_roll(musegan3)
+    print_note_durations_from_track(drum, "drum")
+    print_note_durations_from_track(bass3, "bass")
+    print_note_durations_from_track(pad, "pad")
+    print_note_durations_from_track(lead2, "lead")
     break
     # visualize_piano_roll(drum, bass3, pad, lead2, figure_path, i)
     # save_tracks_to_midi(drum, bass3, pad, lead2, midi_path, i)
