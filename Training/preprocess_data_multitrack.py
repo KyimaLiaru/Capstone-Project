@@ -96,10 +96,10 @@ with tarfile.open(lakh_dataset_path, "r:gz") as tar:
 
                 if result is not None:
                     print(f"Processing {output_file}")
-                    print(f'Pad Sum: {np.sum(result["pad"])}')
-                    print(f'Bass Sum: {np.sum(result["bass"])}')
-                    print(f'Drum Sum: {np.sum(result["drum"])}')
-                    print(f'Lead Sum: {np.sum(result["lead"])}')
+                    print(f'Pad Sum: {np.sum(result["pad"])}, {result["pad"].shape}')
+                    print(f'Bass Sum: {np.sum(result["bass"])}, {result["bass"].shape}')
+                    print(f'Drum Sum: {np.sum(result["drum"])}, {result["drum"].shape}')
+                    print(f'Lead Sum: {np.sum(result["lead"])}, {result["lead"].shape}')
                     # Save the preprocessed data
                     # np.save(output_file, result)
                     # np.savez(output_file, drum=result["drum"], bass=result["bass"], pad=result["pad"], lead=result["lead"])
