@@ -36,7 +36,7 @@ def build_musegan(input_shape=(512, 128), num_tracks=4):
     # Apply different loss weights to each track
     model = Model(inputs=inputs, outputs=processed)
     model.compile(optimizer="adam", loss=["binary_crossentropy"]*4,
-                  loss_weights=[1.0, 1.2, 0.5, 1.5],
+                  loss_weights=[1.0, 1.2, 0.5, 1.5], # Change loss_weights for different train results.
                   metrics=[AUC(name="auc"), Precision(), Recall()]
     )
     return model
