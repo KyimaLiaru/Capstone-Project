@@ -5,13 +5,14 @@ Due to the dataset files being too large, here are the links for downloading the
 Lakh MIDI Dataset Download Link:
 https://colinraffel.com/projects/lmd/
 
-Being inspired by existing MuseGAN and WaveNet models, this project will be designing simplified versions of the model for suitable training time.
+Being inspired by existing MuseGAN model, this project will be designing simplified versions of the model for suitable training time.
 
 The folder structure should be designed as follows:
-<pre>Capstone-Project
+<pre>simiplified-musegan
 ├── dataset
 │   ├── Preprocessed
-│   │   └── Lakh (A folder where preprocessed files are saved)
+│   │   └── Lakh 
+│   │   │   └── MultiTrack (A folder where preprocessed files are saved)
 │   └── Raw
 │       └── Lakh (A folder where raw Lakh MIDI Dataset file should be saved)
 │           └── lmd_matched.tar.gz
@@ -42,3 +43,19 @@ The folder structure should be designed as follows:
 │                ├── . . .
 │                └── musegan_epoch_20.h5
 </pre>
+
+1. Save raw Lakh MIDI Dataset inside "simiplified-musegan/dataset/Raw/Lakh/".
+2. Run "simiplified-musegan/Model/Capstone-Project/Training/preprocess_data.py".
+   - Preprocessed data will be saved in "simiplified-musegan/dataset/Preprocessed/Lakh/MultiTrack/".
+3. Run "simiplified-musegan/Model/Capstone-Project/Training/model.py" to train model.
+   - Remove or rename "musegan-new" folder at "simplified-musegan/Model/trained_model/musegan-new" to something else if you want to train from scratch.
+   - Performance Metric Scores based on AUC, Precision, Recall, Loss will be saved in "simiplified-musegan/Model/Capstone-Project/Result/Performance".
+5. Run "simiplified-musegan/Model/Capstone-Project/Evaluation/generate_output.py" to generate output.
+   - Output piano roll will be saved in .npy format in "simiplified-musegan/Model/Capstone-Project/Result/npy/"
+   - Output piano roll will be saved in .mid format in "simiplified-musegan/Model/Capstone-Project/Result/Midi/"
+   - Output piano roll will be saved in .png format in "simiplified-musegan/Model/Capstone-Project/Result/Rolls/"
+6. Run "simiplified-musegan/Model/Capstone-Project/Evaluation/evaluation.py" to evaluate the training data and generated output based on the metrics designed by Dong et al. (2018).
+   - EB (Empty Bar Rate), Used Pitch Classes (UPC), Qualified Notes (QN), Drum Patterns (DP), Tonal Distance (TD)
+   - Calculation algorithm might be different to those designed by Dong et al. (2018).
+7. Run "simiplified-musegan/Model/Capstone-Project/Evaluation/convert_to_audio.py" to convert generated .mid file to .wav audio.
+   - Audio in .wav format will be saved in "simiplified-musegan/Model/Capstone-Project/Result/wav/"
