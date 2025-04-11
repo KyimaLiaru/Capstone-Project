@@ -40,7 +40,7 @@ def used_pitch_classes(piano_roll):
 
 
 # Metric 3: Qualified Notes
-def qualified_notes(piano_roll, min_duration=3):
+def qualified_notes(piano_roll, min_duration=2):
     qn_scores = []
     for i in range(NUM_TRACKS):
         if i == 0: # Skip drum
