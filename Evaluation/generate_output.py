@@ -118,28 +118,16 @@ def save_tracks_to_midi(drum, bass, pad, lead, output_path, count=1):
         os.makedirs(output_path)
     output_file = os.path.join(output_path, f"midi_{count:02d}.mid")
     midi.write(output_file)
-    print(f"Saved generated MIDI to: {output_file}")
+    print(f"Saved generated output to: {output_file}")
 
-# while True:
-#     # Generate piano roll
-#     print("Generating symbolic music using Simple MuseGAN...")
-#     generated_piano_roll = generate_piano_roll(musegan)
-#     visualize_piano_roll(generated_piano_roll)
-#
-#     answer = input("Continue? (y/n) ")
-#     if answer == "y":
-#         continue
-#     break
+def save_tracks_to_npy(drum, bass, pad, lead, output_path, count=1):
+    if not os.path.exists(output_path):
+        os.makedirs(output_path)
+    output_file = os.path.join(output_path, f"npy_{count:02d}.npy")
+    roll = np.stack([drum.T, bass.T, pad.T, lead.T], axis=0)  # shape: (4, 128, 512)
+    np.save(output_file, roll)
+    print(f"Saved generated output to: {output_file}")
 
-# # Generate piano roll
-# midi_path = "../Result/midi"
-# image_path = "../Result/image"
-# for i in range(0, 30):
-#     print("Generating symbolic music using Simple MuseGAN...")
-#     generated_piano_roll = generate_piano_roll(musegan)
-#     midi_filename = os.path.join(midi_path, f"{i:03d}.npy")
-#     np.save(midi_filename, generated_piano_roll)
-#     visualize_piano_roll(generated_piano_roll, i, image_path)
 
 # Load MuseGAN model
 musegan_save_path = "../../trained_model/musegan-old/musegan_checkpoints/musegan_epoch_11.h5"
@@ -177,3 +165,4 @@ for i in range(1, 21):
     drum3, bass3, pad3, lead3 = generate_piano_roll(musegan3)
     visualize_piano_roll(drum, bass3, pad, lead2, figure_path, i)
     save_tracks_to_midi(drum, bass3, pad, lead2, midi_path, i)
+    save_tracks_to_npy(drum, bass3, pad, lead2, midi_path, i)
